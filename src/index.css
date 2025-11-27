@@ -1,0 +1,28 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --font-display: "Inter", sans-serif;
+  --color-primary-500: oklch(0.84 0.18 117.33);
+  --spacing: 0.25rem;
+}
+
+@keyframes aurora {
+  from { background-position: 50% 50%, 50% 50%; }
+  to { background-position: 350% 50%, 350% 50%; }
+}
+
+@font-face {
+  font-family: "Nunito";
+  src: local("Nunito-Regular"), url('./assets/fonts/Nunito/Nunito-Regular.ttf');
+}
+
+html, body, #root {
+  height: 100%;
+  width: 100%;
+}
+
+.custom-header {
+  background-color: #faf4c9;
+}
