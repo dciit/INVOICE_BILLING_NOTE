@@ -3,6 +3,7 @@ import Layout from "./layout";
 import Login from "./pages/main/login";
 import Register from "./pages/main/register";
 import Homepage from "./pages/main/homepage";
+import InvoiceConfirm from "./pages/invoice/invoice_confirm";
 
 function Routers() {
 
@@ -14,6 +15,8 @@ function Routers() {
                     <Route path="login" element={<Login />} />
                     <Route path="register" element={<Register />} />
                     <Route path="homepage" element={<Homepage />} />
+                    <Route path="invconfrim" element={<InvoiceConfirm/>}/>
+                    <Route path="invconfrimrp" element={<InvoiceConfirm/>}/>
                 </Route>
             </Routes>
         </Router>

@@ -10,12 +10,12 @@ const withMenuIcon = (Icon: React.ElementType) => {
 
 const menuItems: MenuItem[] = [
     {
-        key: 'Confirm Invoice',
+        key: `/invconfrim`,
         label: 'Confirm Invoice',
         icon: withMenuIcon(FileProtectOutlined),
     },
     {
-        key: 'Confirm Invoice Report',
+        key: `/invconfrimrp`,
         label: 'Confirm Invoice Report',
         icon: withMenuIcon(FileProtectOutlined),
     }
