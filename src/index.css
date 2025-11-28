@@ -26,3 +26,23 @@ html, body, #root {
 .custom-header {
   background-color: #faf4c9;
 }
+
+.custom-menu .ant-menu-item,
+.custom-menu .ant-menu-item a {
+    color: black !important;
+    font-weight: bold;
+}
+
+.custom-menu .ant-menu-item:hover,
+.custom-menu .ant-menu-item:hover a {
+    color: black !important;
+    font-weight: bold;
+}
+
+.custom-menu .ant-menu-item-selected,
+.custom-menu .ant-menu-item-selected a {
+    color: black !important;
+    font-weight: bold;
+    background-color: rgba(255,255,255,1) !important;
+}
+

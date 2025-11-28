@@ -46,7 +46,6 @@ function Register() {
         }
 
         const regis = await API_REQUEST_REGISTER(registerData);
-        console.log(regis);
 
         if (regis.status == -1) {
             Swal.fire({
@@ -186,7 +185,7 @@ function Register() {
                     <div id="action" className='flex items-center justify-center pt-3 w-full'>
                         <Button
                             className='bg-[#133E87] hover:bg-[#c5e3f5] focus:ring-3 focus:outline-none focus:ring-[#D4EBF8] font-bold rounded-lg border-black text-white text-lg md:text-xl w-full sm:w-auto px-6 py-5 md:px-44 md:py-6 text-center'
-                        onClick={handleRegisterUser}
+                            onClick={handleRegisterUser}
                         >
                             REGISTER
                         </Button>

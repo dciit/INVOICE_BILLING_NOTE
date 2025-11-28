@@ -15,6 +15,8 @@ import {
     LockOutlined,
     UserOutlined
 } from '@ant-design/icons';
+import { BackgroundGradientAnimation } from "../../components/ui/background-gradient-animation";
+import logo from '../../assets/Daikin.png'
 
 function LoginPage() {
 
@@ -30,7 +32,7 @@ function LoginPage() {
 
     useEffect(() => {
         if (auth.login === true) {
-            navigate(`${base}/`);
+            navigate(`/homepage`);
         }
     }, [auth.login]);
 
@@ -86,7 +88,6 @@ function LoginPage() {
                 })
             }
 
-            console.log('ก่อนเรียก API_LOGIN', loginData);
             const reslogin: ResLogin = await API_LOGIN({
                 username: loginData.username,
                 password: loginData.password,
@@ -107,6 +108,7 @@ function LoginPage() {
                     }
                 });
                 localStorage.setItem('token', token);
+                navigate(`${base}/homepage`)
             } else {
                 Swal.fire({
                     icon: 'error',
@@ -130,30 +132,22 @@ function LoginPage() {
     }
 
     return (
-        <AuroraBackground>
-            <motion.div
-                initial={{ opacity: 0.0, y: 40 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{
-                    delay: 0.3,
-                    duration: 1,
-                    ease: "easeInOut",
-                }}
-            // className="relative flex gap-4 items-center justify-center px-4"
-            >
-                <div className='container w-full'>
+        <BackgroundGradientAnimation>
+            <div className="absolute z-50 inset-0 flex items-center justify-center text-white font-bold px-4 text-3xl text-center md:text-4xl lg:text-7xl">
+                <div className='bg-gray-50 border border-gray-300 rounded-3xl p-4 md:p-16 max-w-full h-auto'>
+                    <div className="flex justify-center">
+                        <img src={logo} alt="Company Logo" className="w-[20rem]" />
+                    </div>
 
-                </div>
-                <div className='border border-gray-300 rounded-xl p-4 md:p-28 max-w-full h-auto'>
-                    <div className="p-3 text-2xl md:text-4xl font-bold text-black text-center">
-                        <ColourfulText text='INVOICE ONLINE' />
+                    <div className="p-3 text-2xl md:text-3xl font-bold text-black text-center">
+                        <ColourfulText text='INVOICE BILLINGNOTE SYSTEM' />
                     </div>
                     <form className='max-w-full mt-5'>
                         <div className='mb-6'>
                             <div className='flex flex-col md:flex-row gap-2'>
                                 <label
                                     htmlFor="username"
-                                    className='text-sm p-2 md:text-xl md:p-3 border border-black rounded-md bg-[#FFF5D7] font-semibold text-black flex items-center gap-2'
+                                    className='text-sm font-mono p-2 md:text-xl md:p-3 border border-black rounded-md bg-yellow-50 font-semibold text-black flex items-center gap-2'
                                 >
                                     <UserOutlined />
                                     USERNAME
@@ -162,17 +156,18 @@ function LoginPage() {
                                     type='text'
                                     id='username'
                                     placeholder='Enter username'
-                                    className="w-full text-sm md:text-lg p-2"
+                                    className="w-full text-sm md:text-lg p-2 font-mono"
                                     value={loginData.username}
                                     onChange={(e) => setLoginData({ ...loginData, username: e.target.value })}
-                                    autoFocus onKeyDown={handleKeyPress}
+                                    autoFocus 
+                                    onKeyDown={handleKeyPress}
                                 />
                             </div>
                             <div className='mt-4'>
                                 <div className='flex flex-col md:flex-row gap-2'>
                                     <label
                                         htmlFor="password"
-                                        className='text-sm p-2 md:text-xl md:p-3 border border-black rounded-md bg-[#FFF5D7] font-semibold text-black flex items-center gap-2'
+                                        className='text-sm font-mono p-2 md:text-xl md:p-3 border border-black rounded-md bg-yellow-50 font-semibold text-black flex items-center gap-2'
                                     >
                                         <LockOutlined />
                                         PASSWORD
@@ -184,22 +179,22 @@ function LoginPage() {
                                         placeholder='*******'
                                         className="w-full text-sm md:text-lg p-2"
                                         onChange={(e) => setLoginData({ ...loginData, password: e.target.value })}
-                                        autoFocus onKeyDown={handleKeyPress}
+                                        onKeyDown={handleKeyPress}
                                     />
                                 </div>
                             </div>
+                            <div className="mt-4">
+                                
+                            </div>
                         </div>
                     </form>
-                    <div className="flex justify-center items-center">
-                        <a href={`${base}/register`} className="text-red-500 font-bold">ลงทะเบียนใหม่</a>
-                    </div>
                     <div id="action" className='flex items-center justify-center pt-3 mt-3 w-full'>
-                        <Button
-                            className='bg-[#133E87] hover:bg-[#c5e3f5] focus:ring-3 focus:outline-none focus:ring-[#D4EBF8] font-bold rounded-lg border-black text-white text-lg md:text-xl w-full sm:w-auto px-6 py-5 md:px-44 md:py-6 text-center'
+                        <button
+                            className='font-mono bg-[#f7ad7d] hover:bg-[#ffd8be] focus:ring-3 focus:outline-none focus:ring-[#608BC1] font-bold rounded-lg border-black text-black text-lg md:text-xl w-full sm:w-auto px-6 py-5 md:px-44 md:py-3 text-center'
                             onClick={handlelogin}
                         >
-                            Login
-                        </Button>
+                            LOGIN
+                        </button>
                     </div>
                     {/* <div className=' text-center'>
                         <span className='text-red-500 text-[14px] w-full'>{login.message}</span>
@@ -221,20 +216,8 @@ function LoginPage() {
                         </div>
                     </div> */}
                 </div>
-                {/* <ToastContainer
-                    position="top-right"
-                    autoClose={3000}
-                    hideProgressBar={false}
-                    newestOnTop
-                    closeOnClick
-                    rtl={false}
-                    pauseOnFocusLoss
-                    draggable={false}
-                    pauseOnHover={false}
-                    theme="light"
-                /> */}
-            </motion.div>
-        </AuroraBackground>
+            </div>
+        </BackgroundGradientAnimation>
     )
 }
 
