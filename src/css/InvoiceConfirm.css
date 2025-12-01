@@ -1,0 +1,17 @@
+.customTable .ant-table-body {
+    scrollbar-width: thin;
+    scrollbar-color: #eaeaea transparent;
+}
+
+.customTable .ant-table-body::-webkit-scrollbar {
+    width: 6px;
+}
+
+.customTable .ant-table-body::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.customTable .ant-table-body::-webkit-scrollbar-thumb {
+    background-color: #eaeaea;
+    border-radius: 3px;
+}

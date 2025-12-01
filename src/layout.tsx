@@ -13,7 +13,7 @@ function Layout() {
 
 
     useEffect(() => {
-        if(!redux.login || !redux.token) return;
+        if (!redux.login || !redux.token) return;
 
         try {
             const payload = JSON.parse(atob(redux.token.split('.')[1]));
@@ -31,7 +31,7 @@ function Layout() {
                 dispatch({ type: 'LOGOUT' });
                 navigate(`/login`)
             }
-        }catch (err) {
+        } catch (err) {
             dispatch({ type: 'LOGOUT' });
             navigate(`/login`)
         }
@@ -43,7 +43,7 @@ function Layout() {
                 login ?
                     <div className="h-screen flex flex-col font-sans">
                         <Toolbar />
-                        <div className="flex-1 bg-[#fdfdfd] pt-4 pb-6 px-5 flex flex-col min-h-0 dark:bg-gray-800">
+                        <div className="flex-1 bg-[#fdfdfd] pt-2 pb-2 px-2 flex flex-col min-h-0 dark:bg-gray-800">
                             <div className="flex-1 bg-white border border-gray-300 dark:bg-gray-800  rounded-md p-3 min-h-0 overflow-hidden">
                                 <div className="h-full">
                                     <Outlet />

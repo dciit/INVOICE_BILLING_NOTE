@@ -15,7 +15,7 @@ const menuItems: MenuItem[] = [
         icon: withMenuIcon(UserAddOutlined),
     },
     {
-        key: 'Change Passwoed',
+        key: 'Change Password',
         label: 'Change Password',
         icon: withMenuIcon(UserSwitchOutlined),
     },
@@ -24,49 +24,43 @@ const menuItems: MenuItem[] = [
         label: 'Log Out',
         icon: withMenuIcon(LogoutOutlined),
     }
-]
+];
 
 interface ManageMenuProps {
     handleLogout: () => void;
+    onCloseDrawer: () => void;
 }
 
-const ManageMenu = ({ handleLogout }: ManageMenuProps) => {
+const ManageMenu = ({ handleLogout, onCloseDrawer }: ManageMenuProps) => {
     const location = useLocation();
     const navigate = useNavigate();
+
     const handleClick: MenuProps['onClick'] = (e) => {
         if (e.key === 'Log Out') {
             handleLogout();
-        } else if (e.key === 'Change Password') {
-            navigate('/change-password');
-        } else if (e.key === 'Register') {
-            navigate("/register")
         }
-    };
+        else if (e.key === 'Change Password') {
+            navigate('/change-password');
+        }
+        else if (e.key === 'Register') {
+            navigate("/register");
+        }
 
-    const currentPath = location.pathname;
-    const pathParts = currentPath.split('/').filter(Boolean);
-    const openKeys: string[] = [];
-    for (let i = 1; i < pathParts.length; i++) {
-        openKeys.push(`/${pathParts.slice(0, i).join("/")}`);
-    }
+        onCloseDrawer(); // ← ปิด Drawer ทุกครั้งที่เลือกเมนู
+    };
 
     return (
         <Menu
             mode="inline"
             items={menuItems}
             onClick={handleClick}
-            selectedKeys={[currentPath]}
-            defaultOpenKeys={openKeys}
-            rootClassName="custom-menu"
+            selectedKeys={[location.pathname]}
             style={{
-                border: 'none',
-                flex: 1,
-                overflow: 'auto',
+                border: "none",
                 backgroundColor: "#ABE0F0",
-                color: "#ABE0F0"
             }}
         />
-    )
+    );
 }
 
 export default ManageMenu;

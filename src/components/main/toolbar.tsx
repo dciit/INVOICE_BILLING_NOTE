@@ -67,7 +67,7 @@ function ToolbarComponent() {
                     open={openDrawer}
                     onClose={() => setOpenDrawer(false)}
                     style={{ backgroundColor: '#ABE0F0' }}
-                    headerStyle={{ borderBottom: '1px solid #fff' }} 
+                    headerStyle={{ borderBottom: '1px solid #fff' }}
                     bodyStyle={{
                         padding: 0,
                         backgroundColor: '#ABE0F0',
@@ -79,13 +79,16 @@ function ToolbarComponent() {
                 >
                     {/* ส่วนบนของ Drawer ที่ scroll ได้ */}
                     <div className="overflow-auto">
-                        <PageMenu />
+                        <PageMenu onCloseDrawer={() => setOpenDrawer(false)} />
                     </div>
 
                     {/* Footer */}
                     <div className="text-xs text-white p-2">
                         <Divider className="bg-white" />
-                        <ManageMenu handleLogout={handleLogout}/>
+                        <ManageMenu
+                            handleLogout={handleLogout}
+                            onCloseDrawer={() => setOpenDrawer(false)}
+                        />
                         <div className="text-center text-gray-700">
                             ©2025 Daikin Compressor Industries Ltd.
                         </div>
