@@ -1,6 +1,7 @@
 import {apiAuthen} from "../constants";
 import axios from "axios";
-import type { GetToken, Login, RequestRegis } from "../interface/mParam";
+import type { Editpass, GetToken, Login, RequestRegis } from "../interface/mParam";
+import { message } from "antd";
 
 const http = axios.create({
     baseURL: apiAuthen,
@@ -11,7 +12,7 @@ const http = axios.create({
 
 export function API_REQUEST_REGISTER(mParam: RequestRegis) {
     return new Promise<any>(resolve => {
-        http.post(`/regisuser`, mParam).then((res) => {
+        http.post(`/register`, mParam).then((res) => {
             resolve(res.data);
         }).catch((e) => {
             resolve({ status: false, message: e.message });
@@ -30,7 +31,7 @@ export function API_GETTOKEN(mParam: GetToken) {
 }
 
 export function API_LOGIN(mParam: Login) {
-    console.log('Login params:', mParam);
+    // console.log('Login params:', mParam);
     return new Promise<any>(resolve => {
         http.post(`/checkauthen`, mParam, {
             headers: { Authorization: `Bearer ${mParam.token}` }
@@ -45,3 +46,16 @@ export function API_LOGIN(mParam: Login) {
     })
 }
 
+
+export function API_CHANGEPASS(mParam: Editpass) {
+    return new Promise<any>(resolve => {
+        http.post(`/editpass`, mParam).then((res) => {
+            resolve(res.data)
+        }).catch((e) => {
+            resolve({
+                status: e.response ? e.response.status : 0,
+                message: e.response ? e.response.statusText : e.message
+            })
+        })
+    })
+}

@@ -40,7 +40,7 @@ const ManageMenu = ({ handleLogout, onCloseDrawer }: ManageMenuProps) => {
             handleLogout();
         }
         else if (e.key === 'Change Password') {
-            navigate('/change-password');
+            navigate('/changepass');
         }
         else if (e.key === 'Register') {
             navigate("/register");

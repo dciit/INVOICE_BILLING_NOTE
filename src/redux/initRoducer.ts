@@ -7,7 +7,10 @@ const initialState: ReduxInterface = {
         token: "",
         input: "",
         username: "",
-        login: false
+        login: false,
+        incharge: "",
+        vendername: "",
+        role: ""
     }
 }
 

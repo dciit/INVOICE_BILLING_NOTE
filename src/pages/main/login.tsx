@@ -1,7 +1,5 @@
-import { motion } from "framer-motion";
-import { AuroraBackground } from "../../components/ui/aurora-background";
 import { ColourfulText } from "../../components/ui/colourful-text";
-import { Button, Input } from "antd";
+import { Input } from "antd";
 import { base } from "../../constants";
 import { useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
@@ -59,7 +57,7 @@ function LoginPage() {
         }
 
         try {
-            setLogin({ login: false, load: true, message: '' });
+            // setLogin({ login: false, load: true, message: '' });
 
             const gettoken = await API_GETTOKEN({
                 username: loginData.username,
@@ -103,7 +101,10 @@ function LoginPage() {
                         input: reslogin.input,
                         pwd: reslogin.pwd,
                         token,
-                        username: loginData.username,
+                        username: reslogin.username,
+                        incharge: reslogin.incharge,
+                        vendername: reslogin.vendername,
+                        role: reslogin.role,
                         login: true
                     }
                 });
@@ -184,7 +185,7 @@ function LoginPage() {
                                 </div>
                             </div>
                             <div className="mt-4">
-                                
+
                             </div>
                         </div>
                     </form>

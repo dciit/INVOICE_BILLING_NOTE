@@ -5,6 +5,7 @@ import Register from "./pages/main/register";
 import Homepage from "./pages/main/homepage";
 import InvoiceConfirm from "./pages/invoice/invoice_confirm";
 import InvoiceConfirmReport from "./pages/invoice/invoice_confirmrp";
+import ChangePass from "./pages/main/changepass";
 
 function Routers() {
 
@@ -18,6 +19,7 @@ function Routers() {
                     <Route path="homepage" element={<Homepage />} />
                     <Route path="invconfrim" element={<InvoiceConfirm/>}/>
                     <Route path="invconfrimrp" element={<InvoiceConfirmReport/>}/>
+                    <Route path="changepass" element={<ChangePass/>} />
                 </Route>
             </Routes>
         </Router>

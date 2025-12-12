@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { base, projectName, image } from "../../constants";
 import React, { useEffect } from "react";
 import { Button, Divider, Drawer, Skeleton } from "antd";
-import { MenuOutlined } from "@ant-design/icons";
+import { MenuOutlined, UserOutlined } from "@ant-design/icons";
 import PageMenu from "./pagemenu";
 import ManageMenu from "./managemenu";
 
@@ -113,9 +113,16 @@ function ToolbarComponent() {
                         className="flex items-center gap-2 cursor-pointer"
                         onClick={(e) => setOpenMenu(e.currentTarget)}
                     >
-                        <span className="text-white font-bold uppercase">
-                            {auth.login === true ? `${auth.username}` : '######'}
+                        <span className="text-black text-lg font-bold uppercase mr-3">
+                            {auth.login ? (
+                                <>
+                                    <UserOutlined /> {auth.username}
+                                </>
+                            ) : (
+                                '######'
+                            )}
                         </span>
+
                         {/* <Avatar size={36} style={{ border: '1px solid #00a0e4' }} /> */}
                     </div>
                 )}

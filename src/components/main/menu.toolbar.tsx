@@ -8,14 +8,14 @@ interface MenuComponentProps {
 }
 
 function MenuComponent(props: MenuComponentProps) {
-    const { open, closeMenu, openMenu } = props;
+    const { open, closeMenu, logout, openMenu } = props;
 
     const items: MenuProps["items"] = [
         {
             key: 'logout',
             label: 'Logout',
             onClick: () => {
-                // logout();
+                logout();
                 closeMenu();
             }
         }

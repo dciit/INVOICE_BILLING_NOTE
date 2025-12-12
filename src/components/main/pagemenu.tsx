@@ -1,5 +1,5 @@
 import { Menu, type MenuProps } from "antd";
-import { FileProtectOutlined, FormOutlined } from "@ant-design/icons";
+import { CalendarOutlined, FileProtectOutlined, FileTextOutlined, FormOutlined } from "@ant-design/icons";
 import { useLocation, useNavigate } from "react-router-dom";
 
 type MenuItem = Required<MenuProps>["items"][number];
@@ -18,6 +18,16 @@ const menuItems: MenuItem[] = [
         key: `/invconfrimrp`,
         label: 'Confirm Invoice Report',
         icon: withMenuIcon(FileProtectOutlined),
+    },
+    {
+        key: `/calendar`,
+        label: 'Calendar Bulling Note',
+        icon: withMenuIcon(CalendarOutlined)
+    },
+    {
+        key: `/manual`,
+        label: 'Manual',
+        icon: withMenuIcon(FileTextOutlined)
     }
 ];
 
