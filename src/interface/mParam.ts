@@ -20,3 +20,9 @@ export interface Login {
     password: string;
     token: string;
 }
+
+export interface Editpass {
+    username: string;
+    oldPassword: string;
+    newPassword: string;
+}
