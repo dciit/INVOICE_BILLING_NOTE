@@ -1,11 +1,15 @@
 export interface RequestRegis {
     username: string;
     password: string;
-    fname: string;
-    lname: string;
+    usertype: string;
+    incharge: string;
+    email: string;
+    tel: string;
+    textid: string;
+    fax: string;
+    address: string;
     role: string;
 }
-
 export interface GetToken {
     username: string;
     password: string;

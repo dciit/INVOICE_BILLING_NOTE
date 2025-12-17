@@ -7,7 +7,10 @@ const initialState: ReduxInterface = {
         token: "",
         input: "",
         username: "",
-        login: false
+        login: false,
+        incharge: "",
+        vendername: "",
+        role: ""
     }
 }
 
@@ -34,7 +37,7 @@ const IndexReducer = (state = initialState, action: any) => {
             //     },
             //     login: false,
             // };
-             return initialState;
+            return initialState;
 
         default:
             return state;

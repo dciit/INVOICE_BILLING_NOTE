@@ -3,8 +3,11 @@ import Layout from "./layout";
 import Login from "./pages/main/login";
 import Register from "./pages/main/register";
 import Homepage from "./pages/main/homepage";
-import InvoiceConfirm from "./pages/invoice/invoice_confirm";
-import InvoiceConfirmReport from "./pages/invoice/invoice_confirmrp";
+import EBuilling_confirm from "./pages/builling/EBuilling_confirm";
+import EBuilling_ReportVendor from "./pages/builling/EBuilling_ReportVendor";
+import EBuilling_ReportAC from "./pages/builling/EBuilling_ReportAC";
+
+
 
 function Routers() {
 
@@ -16,8 +19,9 @@ function Routers() {
                     <Route path="login" element={<Login />} />
                     <Route path="register" element={<Register />} />
                     <Route path="homepage" element={<Homepage />} />
-                    <Route path="invconfrim" element={<InvoiceConfirm/>}/>
-                    <Route path="invconfrimrp" element={<InvoiceConfirmReport/>}/>
+                    <Route path="confirm" element={<EBuilling_confirm />} />
+                    <Route path="ReportVendor" element={<EBuilling_ReportVendor />} />
+                    <Route path="ReportAC" element={<EBuilling_ReportAC />} />
                 </Route>
             </Routes>
         </Router>

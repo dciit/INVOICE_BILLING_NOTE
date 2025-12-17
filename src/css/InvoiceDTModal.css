@@ -1,0 +1,9 @@
+.modalTitleFlex {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.modalTitleFlex p {
+    margin: 0;
+}

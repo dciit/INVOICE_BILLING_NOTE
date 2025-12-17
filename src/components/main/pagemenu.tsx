@@ -1,25 +1,15 @@
 import { Menu, type MenuProps } from "antd";
 import { FileProtectOutlined, FormOutlined } from "@ant-design/icons";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 type MenuItem = Required<MenuProps>["items"][number];
 
-const withMenuIcon = (Icon: React.ElementType) => {
-    return <span className="text-sm font-bold text-white"><Icon /></span>
-};
-
-const menuItems: MenuItem[] = [
-    {
-        key: `/invconfrim`,
-        label: 'Confirm Invoice',
-        icon: withMenuIcon(FormOutlined),
-    },
-    {
-        key: `/invconfrimrp`,
-        label: 'Confirm Invoice Report',
-        icon: withMenuIcon(FileProtectOutlined),
-    }
-];
+const withMenuIcon = (Icon: React.ElementType) => (
+    <span className="text-sm font-bold text-white">
+        <Icon />
+    </span>
+);
 
 interface PageMenuProps {
     onCloseDrawer: () => void;
@@ -28,10 +18,33 @@ interface PageMenuProps {
 const PageMenu = ({ onCloseDrawer }: PageMenuProps) => {
     const location = useLocation();
     const navigate = useNavigate();
+    const auth = useSelector((state: any) => state.reducer.authen);
+
+
+    const menuItems: MenuItem[] = [
+        {
+            key: `/confirm`,
+            label: 'Confirm Invoice',
+            icon: withMenuIcon(FormOutlined),
+        },
+        {
+            key: `/ReportVendor`,
+            label: 'Report Vendor',
+            icon: withMenuIcon(FileProtectOutlined),
+        },
+        ...(auth?.role === "rol_accountant"
+            ? [{
+                key: `/ReportAC`,
+                label: 'Report AC',
+                icon: withMenuIcon(FileProtectOutlined),
+            }]
+            : []
+        )
+    ];
 
     const handleClick: MenuProps['onClick'] = (e) => {
         navigate(e.key);
-        onCloseDrawer(); // ← ปิด Drawer
+        onCloseDrawer();
     };
 
     return (
@@ -46,6 +59,6 @@ const PageMenu = ({ onCloseDrawer }: PageMenuProps) => {
             }}
         />
     );
-}
+};
 
 export default PageMenu;

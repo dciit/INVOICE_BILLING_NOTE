@@ -14,9 +14,9 @@ export interface ReduxInterface {
 
 export interface AuthenInfo {
     username: string;
-    // sname?: string;
-    // lname?: string;
-    // role?: string;
+    incharge: string;
+    vendername: string;
+    role: string;
     pwd: string;
     token: string;
     input: string;

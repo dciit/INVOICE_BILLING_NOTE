@@ -19,6 +19,7 @@ export function API_REQUEST_REGISTER(mParam: RequestRegis) {
     })
 }
 
+
 export function API_GETTOKEN(mParam: GetToken) {
     return new Promise<any>(resolve => {
         http.post(`/login`, mParam).then((res) => {
