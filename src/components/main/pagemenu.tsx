@@ -1,15 +1,17 @@
 import { Menu, type MenuProps } from "antd";
-import { FileProtectOutlined, FormOutlined } from "@ant-design/icons";
+import { CalendarOutlined, FileProtectOutlined, FormOutlined } from "@ant-design/icons";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 
 type MenuItem = Required<MenuProps>["items"][number];
+
 
 const withMenuIcon = (Icon: React.ElementType) => (
     <span className="text-sm font-bold text-white">
         <Icon />
     </span>
 );
+
 
 interface PageMenuProps {
     onCloseDrawer: () => void;
@@ -32,6 +34,11 @@ const PageMenu = ({ onCloseDrawer }: PageMenuProps) => {
             label: 'Report Vendor',
             icon: withMenuIcon(FileProtectOutlined),
         },
+        {
+            key: `/calendarbulling`,
+            label: 'Calendar Bulling Note',
+            icon: withMenuIcon(CalendarOutlined)
+        },
         ...(auth?.role === "rol_accountant"
             ? [{
                 key: `/ReportAC`,
@@ -41,6 +48,7 @@ const PageMenu = ({ onCloseDrawer }: PageMenuProps) => {
             : []
         )
     ];
+
 
     const handleClick: MenuProps['onClick'] = (e) => {
         navigate(e.key);
