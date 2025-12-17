@@ -165,7 +165,7 @@ function Register() {
                                             placeholder='Enter Incharge'
                                             className="w-full text-sm md:text-sm p-2"
                                             value={registerData.incharge.toLocaleUpperCase()}
-                                            onChange={(e) => setRegisterData({ ...registerData, incharge: e.target.value })}
+                                            onChange={(e) => setRegisterData({ ...registerData, incharge: e.target.value.toUpperCase() })}
                                         // autoFocus
                                         // onKeyDown={handleKeyPress}
                                         />

@@ -6,6 +6,7 @@ import Homepage from "./pages/main/homepage";
 import InvoiceConfirm from "./pages/invoice/invoice_confirm";
 import InvoiceConfirmReport from "./pages/invoice/invoice_confirmrp";
 import ChangePass from "./pages/main/changepass";
+import CalendarBulling from "./pages/invoice/calendar_bulling";
 
 function Routers() {
 
@@ -20,6 +21,7 @@ function Routers() {
                     <Route path="invconfrim" element={<InvoiceConfirm/>}/>
                     <Route path="invconfrimrp" element={<InvoiceConfirmReport/>}/>
                     <Route path="changepass" element={<ChangePass/>} />
+                    <Route path="calendarbulling" element={<CalendarBulling />} />
                 </Route>
             </Routes>
         </Router>

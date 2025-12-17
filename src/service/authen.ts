@@ -1,7 +1,6 @@
 import {apiAuthen} from "../constants";
 import axios from "axios";
 import type { Editpass, GetToken, Login, RequestRegis } from "../interface/mParam";
-import { message } from "antd";
 
 const http = axios.create({
     baseURL: apiAuthen,

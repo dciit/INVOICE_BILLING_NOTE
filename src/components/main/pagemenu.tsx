@@ -20,7 +20,7 @@ const menuItems: MenuItem[] = [
         icon: withMenuIcon(FileProtectOutlined),
     },
     {
-        key: `/calendar`,
+        key: `/calendarbulling`,
         label: 'Calendar Bulling Note',
         icon: withMenuIcon(CalendarOutlined)
     },
