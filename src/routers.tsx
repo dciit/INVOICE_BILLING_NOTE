@@ -8,6 +8,7 @@ import EBuilling_ReportVendor from "./pages/builling/EBuilling_ReportVendor";
 import EBuilling_ReportAC from "./pages/builling/EBuilling_ReportAC";
 import ChangePass from "./pages/main/changepass";
 import CalendarBulling from "./pages/invoice/calendar_bulling";
+import EBuilling_confirmForAC from "./pages/builling/EBuilling_confirmForAC";
 
 
 function Routers() {
@@ -20,10 +21,11 @@ function Routers() {
                     <Route path="login" element={<Login />} />
                     <Route path="register" element={<Register />} />
                     <Route path="homepage" element={<Homepage />} />
-                    <Route path="confirm" element={<EBuilling_confirm />} />
+                    <Route path="Invoice" element={<EBuilling_confirm />} />
+                    <Route path="Invoices" element={<EBuilling_confirmForAC />} />
                     <Route path="ReportVendor" element={<EBuilling_ReportVendor />} />
                     <Route path="ReportAC" element={<EBuilling_ReportAC />} />
-                    <Route path="changepass" element={<ChangePass/>} />
+                    <Route path="changepass" element={<ChangePass />} />
                     <Route path="calendarbulling" element={<CalendarBulling />} />
                 </Route>
             </Routes>

@@ -30,7 +30,11 @@ function LoginPage() {
 
     useEffect(() => {
         if (auth.login === true) {
-            navigate(`/confirm`);
+            if (auth.role === "rol_accountant") {
+                navigate(`/Invoices`);
+            } else {
+                navigate(`/Invoice`);
+            }
         }
     }, [auth.login]);
 
@@ -141,7 +145,7 @@ function LoginPage() {
                     </div>
 
                     <div className="p-3 text-2xl md:text-3xl font-bold text-black text-center">
-                        <ColourfulText text='INVOICE BILLINGNOTE SYSTEM' />
+                        <ColourfulText text='E-BULLING SYSTEM' />
                     </div>
                     <form className='max-w-full mt-5'>
                         <div className='mb-6'>

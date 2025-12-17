@@ -139,7 +139,9 @@ export default function EBuilling_ReportVendor() {
         <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
             <div style={{ display: "flex", alignItems: "center" }}>
                 <FileProtectOutlined style={{ fontSize: 28, marginRight: 10, color: "#1890ff" }} />
-                <p style={{ fontWeight: 600, fontSize: 20 }}>Report Vendor</p>
+                <p style={{ fontWeight: 600, fontSize: 20, margin: 0 }}>
+                    {auth?.role === "rol_accountant" ? "Confirm Invoice" : "Report"}
+                </p>
             </div>
 
             <Divider style={{ borderColor: "#d0cdcd", marginTop: 8 }} />
@@ -164,7 +166,6 @@ export default function EBuilling_ReportVendor() {
                             <Option value="%">All</Option>
                             <Option value="CREATE">CREATE</Option>
                             <Option value="RECEIVE">RECEIVE</Option>
-                            <Option value="REJECT">REJECT</Option>
                             <Option value="PAYMENT">PAYMENT</Option>
                         </Select>
                     </Form.Item>

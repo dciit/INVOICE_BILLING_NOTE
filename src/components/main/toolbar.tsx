@@ -60,7 +60,7 @@ function ToolbarComponent() {
                 <Drawer
                     title={
                         <span className="text-black font-bold">
-                            INVOICE BILLINGNOTE SYSTEM
+                            E-BULLING SYSTEM
                         </span>
                     }
                     placement="left"

@@ -13,7 +13,6 @@ interface EBuilling_DetailModalVendorProps {
     onClose: () => void;
     refreshData: () => void;
     invoiceDetail?: {
-        address: string;
         billerby: string;
         billerdate: string;
         date: string;
@@ -28,6 +27,11 @@ interface EBuilling_DetailModalVendorProps {
         vendorcode: string;
         vendorname: string;
         whtax: number;
+        addreS1: string;
+        addreS2: string;
+        faxno: string;
+        zipcode: string;
+        telno: string;
     };
 }
 
@@ -63,6 +67,8 @@ const EBuilling_DetailModalAC: React.FC<EBuilling_DetailModalVendorProps> = ({ o
             const res = await service.PostReportACAndVendorDetail({ venderCode: invoiceDetail.vendorcode, status: invoiceDetail.status, role: auth.role });
             const mappedData = res.data.map((item: any, index: number) => ({ ...item, key: index }));
             setDataSource(mappedData);
+
+
         } catch (error) {
             console.error(error);
         }
@@ -131,39 +137,6 @@ const EBuilling_DetailModalAC: React.FC<EBuilling_DetailModalVendorProps> = ({ o
     };
 
 
-    const Rejectbilling = async () => {
-        try {
-            setLoading(true);
-
-            const invoiceNoList = DataSource.map(item => `'${item.invoiceno}'`).join(",");
-            const invoiceNoForIn = `(${invoiceNoList})`;
-
-            await service.PostRejectbilling({
-                invoiceNo: invoiceNoForIn,
-                receiveBy: auth.username.trim()
-            });
-
-
-            Swal.fire(
-                'สำเร็จ!',
-                'เอกสารถูกตีกลับแล้ว',
-                'success'
-            );
-
-            refreshData();
-
-        } catch (error) {
-            console.error(error);
-            Swal.fire(
-                'ล้มเหลว!',
-                error.message || 'ไม่สามารถบันทึกข้อมูลได้',
-                'error'
-            );
-        } finally {
-            setLoading(false);
-        }
-    };
-
 
 
     const thStyle = { border: "1px solid #333", padding: "8px" };
@@ -182,28 +155,50 @@ const EBuilling_DetailModalAC: React.FC<EBuilling_DetailModalVendorProps> = ({ o
                 <br />
 
 
-                <div style={{
-                    display: "grid",
-                    gridTemplateColumns: "3fr 1fr",
-                    columnGap: "20px",
-                    lineHeight: "1.6",
-                    width: "100%"
-                }}>
+                <div
+                    style={{
+                        display: "grid",
+                        gridTemplateColumns: "3fr 1fr",
+                        columnGap: "20px",
+                        lineHeight: "1.6",
+                        width: "100%",
+                        fontSize: 16,
+                    }}
+                >
                     <div>
-                        <p style={{ margin: 0, fontSize: 16 }}>
-                            <span style={{ display: "inline-block", width: 180 }}>
-                                <b>บริษัท / Customer :</b>
+                        {/* ชื่อบริษัท */}
+                        <p style={{ margin: 0 }}>
+                            <span style={{ display: "inline-block", width: 180, fontWeight: "bold" }}>
+                                บริษัท / Customer :
                             </span>
                             {invoiceDetail.vendorname}
                         </p>
-                        <p style={{ margin: 0, fontSize: 16 }}>
-                            <span style={{ display: "inline-block", width: 130 }}>
-                                <b>ที่อยู่ / Address :</b>
+
+
+                        <p style={{ margin: "5px 0 0 0" }}>
+                            <span style={{ display: "inline-block", width: 130, fontWeight: "bold" }}>
+                                ที่อยู่ / Address :
                             </span>
-                            {invoiceDetail.address}
+                            {invoiceDetail.addreS1}
+                        </p>
+
+                        <p style={{ margin: "5px 0 0 0" }}>
+                            <span style={{ display: "inline-block", width: 130 }}></span>
+                            <span>
+                                {invoiceDetail.addreS2} &nbsp;  {invoiceDetail.zipcode}
+                            </span>
+                        </p>
+
+
+                        <p style={{ margin: "5px 0 0 0" }}>
+                            <span style={{ display: "inline-block", width: 130 }}></span>
+                            <span>
+                                Tel. {invoiceDetail.telno} &nbsp;&nbsp; Fax. {invoiceDetail.faxno}
+                            </span>
                         </p>
                     </div>
                 </div>
+
 
 
                 <table style={{ width: "95%", borderCollapse: "collapse", margin: "20px auto", fontSize: 14 }}>
@@ -261,7 +256,7 @@ const EBuilling_DetailModalAC: React.FC<EBuilling_DetailModalVendorProps> = ({ o
                     padding: "0 16px"
                 }}
             >
-                {auth?.role?.toLowerCase() === "rol_accountant" && (
+                {auth?.role?.toLowerCase() === "rol_accountant" && invoiceDetail.receiveD_BILLERBY !== "" && (
                     <Button
                         type="primary"
                         size="large"
