@@ -7,7 +7,7 @@ import { useSelector } from "react-redux";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 
-interface EBuilling_DetailModalACPrintProps {
+interface EBilling_DetailModalACPrintProps {
     open: boolean;
     onClose: () => void;
     invoiceDetail?: {
@@ -27,6 +27,8 @@ interface EBuilling_DetailModalACPrintProps {
         vendorname: string;
         whtax: number;
         status: string;
+        invoicedate: string;
+        invoiceno: string;
     };
 }
 
@@ -44,7 +46,7 @@ interface InvoiceDetail {
     invoiceno?: string;
 }
 
-const EBuilling_DetailModalACPrint: React.FC<EBuilling_DetailModalACPrintProps> = ({ open, onClose, invoiceDetail }) => {
+const EBilling_DetailModalACPrint: React.FC<EBilling_DetailModalACPrintProps> = ({ open, onClose, invoiceDetail }) => {
     const auth = useSelector((state: any) => state.reducer.authen);
     const modalRef = useRef<HTMLDivElement>(null);
     const n = (v?: number) => (v ?? 0).toLocaleString();
@@ -181,4 +183,4 @@ const EBuilling_DetailModalACPrint: React.FC<EBuilling_DetailModalACPrintProps> 
     );
 };
 
-export default EBuilling_DetailModalACPrint;
+export default EBilling_DetailModalACPrint;

@@ -15,13 +15,13 @@ const storage = typeof window !== 'undefined' ? {
 
 
 const persistConfig = {
-    key: 'root',
-    storage
+  key: 'e-billing-root',
+  storage
 }
 declare global {
-    interface Window {
-        __REDUX_DEVTOOLS_EXTENSION_COMPOSE__?: typeof compose;
-    }
+  interface Window {
+    __REDUX_DEVTOOLS_EXTENSION_COMPOSE__?: typeof compose;
+  }
 }
 const persistedReducer = persistReducer<any, any>(persistConfig, rootReducer);
 const middleware: any = [thunk]

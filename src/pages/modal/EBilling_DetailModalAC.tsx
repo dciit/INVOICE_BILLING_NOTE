@@ -8,7 +8,7 @@ import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import Swal from "sweetalert2";
 
-interface EBuilling_DetailModalVendorProps {
+interface EBilling_DetailModalVendorProps {
     open: boolean;
     onClose: () => void;
     refreshData: () => void;
@@ -32,6 +32,8 @@ interface EBuilling_DetailModalVendorProps {
         faxno: string;
         zipcode: string;
         telno: string;
+        invoicedate: string;
+        invoiceno: string;
     };
 }
 
@@ -49,7 +51,7 @@ interface InvoiceDetail {
     invoiceno: string;
 }
 
-const EBuilling_DetailModalAC: React.FC<EBuilling_DetailModalVendorProps> = ({ open, onClose, invoiceDetail, refreshData }) => {
+const EBilling_DetailModalAC: React.FC<EBilling_DetailModalVendorProps> = ({ open, onClose, invoiceDetail, refreshData }) => {
     if (!invoiceDetail) return null;
     const auth = useSelector((state: any) => state.reducer.authen);
     const [DataSource, setDataSource] = useState<InvoiceDetail[]>([]);
@@ -97,19 +99,19 @@ const EBuilling_DetailModalAC: React.FC<EBuilling_DetailModalVendorProps> = ({ o
         if (button) button.style.display = "block";
     };
 
+    console.log(invoiceDetail)
 
-
-
-    const receivebilling = async () => {
+    const payment = async () => {
         try {
             setLoading(true);
 
             const invoiceNoList = DataSource.map(item => `'${item.invoiceno}'`).join(",");
             const invoiceNoForIn = `(${invoiceNoList})`;
 
-            await service.PostReceivebilling({
+            await service.PostPayment({
+                vendorCode: invoiceDetail.vendorcode,
                 invoiceNo: invoiceNoForIn,
-                receiveBy: auth.username.trim()
+                payBy: auth.incharge.trim()
             });
 
 
@@ -256,11 +258,11 @@ const EBuilling_DetailModalAC: React.FC<EBuilling_DetailModalVendorProps> = ({ o
                     padding: "0 16px"
                 }}
             >
-                {auth?.role?.toLowerCase() === "rol_accountant" && invoiceDetail.receiveD_BILLERBY !== "" && (
+                {auth?.role?.toLowerCase() === "rol_accountant" && invoiceDetail.paymenT_BY === "" && (
                     <Button
                         type="primary"
                         size="large"
-                        onClick={receivebilling}
+                        onClick={payment}
                         loading={loading}
                         style={{
                             backgroundColor: "#52c41a",
@@ -292,4 +294,4 @@ const EBuilling_DetailModalAC: React.FC<EBuilling_DetailModalVendorProps> = ({ o
     );
 };
 
-export default EBuilling_DetailModalAC;
+export default EBilling_DetailModalAC;

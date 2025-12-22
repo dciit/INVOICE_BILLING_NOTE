@@ -1,3 +1,4 @@
+//@ts-nocheck
 import {
     EnvironmentOutlined,
     InfoOutlined,
@@ -314,9 +315,9 @@ function Register() {
                         </div>
                     </div>
                     {/* list name vender */}
-                    <div className="border border-gray-400 rounded-lg w-4/5 p-3">
+                    {/* <div className="border border-gray-400 rounded-lg w-4/5 p-3">
 
-                    </div>
+                    </div> */}
                 </div>
 
             </div >

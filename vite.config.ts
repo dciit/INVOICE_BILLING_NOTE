@@ -10,5 +10,5 @@ export default defineConfig({
       },
     }),
   ],
-  base: '/invbilling/',
+  base: '/E-BILLING/',
 })

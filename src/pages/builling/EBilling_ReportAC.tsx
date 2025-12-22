@@ -9,8 +9,8 @@ import "../../css/InvoiceConfirm.css";
 import Swal from "sweetalert2";
 import dayjs from "dayjs";
 import isBetween from "dayjs/plugin/isBetween";
-import EBuilling_DetailModalAC from "../modal/EBuilling_DetailModalAC";
-import EBuilling_DetailModalACPrint from "../modal/EBuilling_DetailModalACPrint";
+import EBilling_DetailModalAC from "../modal/EBilling_DetailModalAC";
+import EBilling_DetailModalACPrint from "../modal/EBilling_DetailModalACPrint";
 
 
 dayjs.extend(isBetween);
@@ -41,7 +41,7 @@ interface InvoiceDetail {
     telno: string;
 }
 
-export default function EBuilling_ReportAC() {
+export default function EBilling_ReportAC() {
     const auth = useSelector((state: any) => state.reducer.authen);
     const [fromDate, setFromDate] = useState<Dayjs | null>(dayjs());
     const [toDate, setToDate] = useState<Dayjs | null>(dayjs());
@@ -64,7 +64,6 @@ export default function EBuilling_ReportAC() {
             const mappedData = res.data.map((item: any, index: number) => ({ ...item, key: index }));
             setDataSource(mappedData);
 
-            console.log(mappedData)
         } catch (error) {
             console.error(error);
         } finally {
@@ -177,7 +176,7 @@ export default function EBuilling_ReportAC() {
 
             <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}>
                 <Form layout="inline">
-                    <span style={{ marginRight: 10, fontWeight: 500, fontSize: 16 }}>INVOICE DATE</span>
+                    <span style={{ marginRight: 10, fontWeight: 500, fontSize: 16 }}>Invoice Date</span>
 
                     <span style={{ marginRight: 10 }}>From :</span>
                     <Form.Item>
@@ -191,10 +190,11 @@ export default function EBuilling_ReportAC() {
 
                     <span style={{ margin: "0 10px" }}>Status :</span>
                     <Form.Item>
-                        <Select value={status} onChange={setStatus} style={{ width: 120 }}>
+                        <Select value={status} onChange={setStatus} style={{ width: 220, height: 40 }}>
                             <Option value="%">All</Option>
-                            <Option value="CREATE">CREATE</Option>
-                            <Option value="RECEIVE">RECEIVE</Option>
+                            <Option value="WAITING">Waiting Confirm</Option>
+                            <Option value="CONFIRM">RECEIVE</Option>
+                            <Option value="REJECT">REJECT</Option>
                             <Option value="PAYMENT">PAYMENT</Option>
                         </Select>
                     </Form.Item>
@@ -244,7 +244,7 @@ export default function EBuilling_ReportAC() {
                 />
             </div>
 
-            <EBuilling_DetailModalAC
+            <EBilling_DetailModalAC
                 open={isDetailModalOpenDetail}
                 onClose={() => setIsDetailModalOpenDetail(false)}
                 invoiceDetail={detailRecordDetail}
@@ -252,7 +252,7 @@ export default function EBuilling_ReportAC() {
             />
 
 
-            <EBuilling_DetailModalACPrint
+            <EBilling_DetailModalACPrint
                 open={isDetailModalOpenPrint}
                 onClose={() => setIsDetailModalOpenPrint(false)}
                 invoiceDetail={detailRecordPrint}

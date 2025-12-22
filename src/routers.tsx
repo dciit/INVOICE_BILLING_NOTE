@@ -3,28 +3,28 @@ import Layout from "./layout";
 import Login from "./pages/main/login";
 import Register from "./pages/main/register";
 import Homepage from "./pages/main/homepage";
-import EBuilling_confirm from "./pages/builling/EBuilling_confirm";
-import EBuilling_ReportVendor from "./pages/builling/EBuilling_ReportVendor";
-import EBuilling_ReportAC from "./pages/builling/EBuilling_ReportAC";
+import EBilling_confirm from "./pages/builling/EBilling_confirm";
+import EBilling_ReportVendor from "./pages/builling/EBilling_ReportVendor";
+import EBilling_ReportAC from "./pages/builling/EBilling_ReportAC";
 import ChangePass from "./pages/main/changepass";
 import CalendarBulling from "./pages/invoice/calendar_bulling";
-import EBuilling_confirmForAC from "./pages/builling/EBuilling_confirmForAC";
+import EBilling_confirmForAC from "./pages/builling/EBilling_confirmForAC";
 
 
 function Routers() {
 
     return (
-        <Router basename="/invbilling">
+        <Router basename="/E-BILLING">
             <Routes>
                 <Route element={<Layout />}>
                     <Route path="*" element={<Login />} />
                     <Route path="login" element={<Login />} />
                     <Route path="register" element={<Register />} />
                     <Route path="homepage" element={<Homepage />} />
-                    <Route path="Invoice" element={<EBuilling_confirm />} />
-                    <Route path="Invoices" element={<EBuilling_confirmForAC />} />
-                    <Route path="ReportVendor" element={<EBuilling_ReportVendor />} />
-                    <Route path="ReportAC" element={<EBuilling_ReportAC />} />
+                    <Route path="Invoice" element={<EBilling_confirm />} />
+                    <Route path="Invoices" element={<EBilling_confirmForAC />} />
+                    <Route path="ReportVendor" element={<EBilling_ReportVendor />} />
+                    <Route path="ReportAC" element={<EBilling_ReportAC />} />
                     <Route path="changepass" element={<ChangePass />} />
                     <Route path="calendarbulling" element={<CalendarBulling />} />
                 </Route>

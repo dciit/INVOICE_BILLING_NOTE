@@ -26,8 +26,6 @@ const PostReceivebilling = (param: any) => {
 }
 
 
-
-
 const PostReportACHeader = (param: any) => {
     return http.apiConfirm.post("PostReportACHeader", param);
 }
@@ -38,6 +36,10 @@ const PostPayment = (param: any) => {
 
 const PostReportInvoiceByAC = (param: any) => {
     return http.apiConfirm.post("PostReportInvoiceByAC", param);
+}
+
+const PostReportVendorDetailPrint = (param: any) => {
+    return http.apiConfirm.post("PostReportVendorDetailPrint", param);
 }
 
 
@@ -51,4 +53,5 @@ export default {
     PostReportACHeader,
     PostPayment,
     PostReportInvoiceByAC,
+    PostReportVendorDetailPrint,
 };

@@ -30,7 +30,7 @@ export type MData = {
     vatIn?: string;
 };
 
-export default function EBuilling_confirmForAC() {
+export default function EBilling_confirm() {
     const auth = useSelector((state: any) => state.reducer.authen);
     const [fromDate, setFromDate] = useState<Dayjs | null>(dayjs());
     const [toDate, setToDate] = useState<Dayjs | null>(dayjs());
@@ -40,7 +40,6 @@ export default function EBuilling_confirmForAC() {
     const [InvoiceNo, setInvoiceNo] = useState("");
     const [incharge, setIncharge] = useState("");
     const visibleData = dataSource;
-    const [vendor, setVendor] = useState<string | undefined>();
 
 
     useEffect(() => {
@@ -50,34 +49,17 @@ export default function EBuilling_confirmForAC() {
     const fetchData = async () => {
         try {
             setLoading(true);
-            const res = await service.PostReportInvoiceByAC({
-                venderCode: "%",
-                invoiceNo: "%",
+            const res = await service.PostSearchInvoiceRequet({
+                venderCode: auth.username,
+                invoiceNo: InvoiceNo,
                 invoiceDateFrom: "",
-                invoiceDateTo: "",
+                invoiceDateTo: ""
             });
-
-
             const mappedData = res.data.map((item: any, index: number) => ({
+                ...item,
                 key: index,
-                no: index + 1,
-
-                amtb: item.amtb,
-                currency: item.currency,
-                duedate: item.duedate,
-
-                invoiceDate: item.invoicedate,
-                invoiceNo: item.invoiceno,
-                paymentTerms: item.paymenT_TERMS,
-
-                vendorName: item.vendorname,
-                status: item.status,
-
-                vat: item.totalvat,
-                whTaxRate: item.whtax,
-                totalAmount: item.totaL_AMOUNT,
+                whTaxRate: null,
             }));
-
             setDataSource(mappedData);
         } catch (error) {
             console.error(error);
@@ -96,25 +78,32 @@ export default function EBuilling_confirmForAC() {
             Swal.fire({
                 icon: "warning",
                 title: "Please select Document dates.",
+                confirmButtonColor: "#3085d6",
+                confirmButtonText: "OK",
             });
             return;
         }
 
         try {
             setLoading(true);
-            const res = await service.PostReportInvoiceByAC({
-                venderCode: vendor,
-                invoiceNo: invoiceNo || "%",
+            const res = await service.PostSearchInvoiceRequet({
+                venderCode: auth.username,
+                invoiceNo: InvoiceNo,
                 invoiceDateFrom: fromDate.format("YYYYMMDD"),
-                invoiceDateTo: toDate.format("YYYYMMDD"),
+                invoiceDateTo: toDate.format("YYYYMMDD")
             });
 
-            const filtered = mapApiToData(res.data).filter(item => {
-                const d = dayjs(item.invoiceDate, "DD/MM/YYYY");
-                return d.isBetween(fromDate, toDate, "day", "[]");
-            });
 
-            setDataSource(filtered);
+
+            const filteredData = res.data
+                .map((item: any, index: number) => ({ ...item, key: index, whTaxRate: null }))
+                .filter((item: any) => {
+                    const date = dayjs(item.invoiceDate, "DD/MM/YYYY");
+                    return date.isBetween(fromDate, toDate, "day", "[]");
+                });
+
+            setDataSource(filteredData);
+            setSelectedKeys([]);
         } catch (error) {
             console.error(error);
         } finally {
@@ -137,6 +126,88 @@ export default function EBuilling_confirmForAC() {
         return whTax;
     };
 
+    const onConfirm = async () => {
+        if (selectedKeys.length === 0) {
+            Swal.fire({
+                icon: "warning",
+                title: "Please select at least one invoice.",
+                confirmButtonText: "OK",
+            });
+            return;
+        }
+
+
+        if (incharge === "") {
+            Swal.fire({
+                icon: "warning",
+                title: "Please input incharge.",
+                confirmButtonText: "OK",
+            });
+            return;
+        }
+
+        try {
+            const nbrRes = await service.getNbr();
+            const running = nbrRes.data[0].running;
+            const selectedItems = dataSource.filter(item => selectedKeys.includes(item.key));
+
+            for (let i = 0; i < selectedItems.length; i++) {
+                const item = selectedItems[i];
+
+                const amtb = Number(item.amtb ?? 0);
+                const vat = Number(item.vat ?? 0);
+                const whTax = calcWhTax(item);
+                const totalVat = amtb + vat;
+                const totalAmount = totalVat - whTax;
+                const netPaid = totalAmount - whTax;
+                const dueDate = item.duedate ? dayjs(item.duedate, "DD/MM/YYYY") : null;
+                const invoiceDate = item.invoiceDate ? dayjs(item.invoiceDate, "DD/MM/YYYY") : null;
+
+
+
+                const payload = {
+                    DOCUMENTNO: running,
+                    DOCUMENTDATE: dayjs().format("YYYY-MM-DD"),
+                    PAYMENT_TERMS: item.paymentTerms?.trim(),
+                    DUEDATE: dueDate && dueDate.isValid() ? dueDate.format("YYYY-MM-DD") : null,
+                    VENDORCODE: item.venderCode?.trim(),
+                    BILLERBY: incharge.trim(),
+                    CREATEBY: incharge.trim(),
+                    INVOICENO: item.invoiceNo?.trim(),
+                    INVOICEDATE: invoiceDate && invoiceDate.isValid() ? invoiceDate.format("YYYY-MM-DD") : null,
+                    TAXID: item.taxID?.trim(),
+                    CURRENCY: item.currency?.trim(),
+                    AMTB: parseFloat(amtb.toFixed(2)),
+                    VAT: parseFloat(vat.toFixed(2)),
+                    TOTALVAT: parseFloat(totalVat.toFixed(2)),
+                    RATE: item.whTaxRate ?? "ไม่หัก",
+                    WHTAX: parseFloat(whTax.toFixed(2)),
+                    NETPAID: parseFloat(netPaid.toFixed(2)),
+                    BEFORVATAMOUNT: parseFloat(amtb.toFixed(2)),
+                    TOTAL_AMOUNT: parseFloat(totalAmount.toFixed(2)),
+                    STATUS: "WAITING",
+                };
+
+                //console.log("payload", payload)
+
+                await service.PostCreateInvoice(payload);
+            }
+
+            Swal.fire({
+                icon: "success",
+                title: "Invoice created successfully!",
+                confirmButtonText: "OK",
+            });
+            setSelectedKeys([]);
+        } catch (err) {
+            console.error("Error", err);
+            Swal.fire({
+                icon: "error",
+                title: "Cannot create invoice!",
+                text: "Please try again later.",
+            });
+        }
+    };
 
     const columns = [
         { title: "No", dataIndex: "no", width: 60, align: "center" },
@@ -181,12 +252,35 @@ export default function EBuilling_confirmForAC() {
         {
             title: "W/H TAX RATE %",
             dataIndex: "whTaxRate",
-            width: 120,
             align: "center",
-            render: (value: any) => (
-                <div style={{ textAlign: "center" }}>
-                    {value}
-                </div>
+            width: 120,
+            render: (val: any, record: any) => (
+                <Select
+                    value={record.whTaxRate}
+                    style={{ width: 90, backgroundColor: "#fffacd" }}
+                    placeholder="เลือก"
+                    onChange={(value) => {
+                        if (value === "ไม่หัก") {
+                            setDataSource(prev =>
+                                prev.map(row => ({ ...row, whTaxRate: "ไม่หัก" }))
+                            );
+                        } else {
+                            setDataSource(prev =>
+                                prev.map(row =>
+                                    row.key === record.key
+                                        ? { ...row, whTaxRate: `${value}%` }
+                                        : row
+                                )
+                            );
+                        }
+                    }}
+                >
+                    <Select.Option value="1">1%</Select.Option>
+                    <Select.Option value="2">2%</Select.Option>
+                    <Select.Option value="3">3%</Select.Option>
+                    <Select.Option value="5">5%</Select.Option>
+                    <Select.Option value="ไม่หัก">ไม่หัก</Select.Option>
+                </Select>
             ),
         },
         {
@@ -226,7 +320,59 @@ export default function EBuilling_confirmForAC() {
                 );
             }
         },
-        { title: "STATUS", dataIndex: "status", width: 100, align: "center" },
+        {
+            title: (
+                <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                    <span>CONFIRM</span>
+                    <Checkbox
+                        checked={
+                            selectedKeys.length === visibleData.length && visibleData.length > 0
+                        }
+                        indeterminate={
+                            selectedKeys.length > 0 &&
+                            selectedKeys.length < visibleData.length
+                        }
+                        onChange={(e) => {
+                            const notSelected = visibleData.filter(row => !row.whTaxRate);
+                            if (notSelected.length > 0) {
+                                Swal.fire({
+                                    icon: "warning",
+                                    title: "กรุณาเลือก W/H TAX RATE ให้ครบทุกแถวก่อน",
+                                    confirmButtonText: "OK",
+                                });
+                                return;
+                            }
+                            toggleSelectAll(e.target.checked);
+                        }}
+                    />
+                </div>
+            ),
+            dataIndex: "confirm",
+            width: 70,
+            align: "center",
+            render: (_: any, record: any) => (
+                <Checkbox
+                    disabled={!record.whTaxRate}
+                    checked={selectedKeys.includes(record.key)}
+                    onChange={(e) => {
+                        if (!record.whTaxRate) {
+                            Swal.fire({
+                                icon: "warning",
+                                title: "กรุณาเลือก W/H TAX RATE ก่อน!",
+                                confirmButtonText: "OK",
+                            });
+                            return;
+                        }
+
+                        if (e.target.checked) {
+                            setSelectedKeys([...selectedKeys, record.key]);
+                        } else {
+                            setSelectedKeys(selectedKeys.filter(k => k !== record.key));
+                        }
+                    }}
+                />
+            ),
+        },
     ];
 
     const getGrandTotal = () => {
@@ -243,15 +389,14 @@ export default function EBuilling_confirmForAC() {
         <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
             <div style={{ display: "flex", alignItems: "center" }}>
                 <FormOutlined style={{ fontSize: 28, marginRight: 10, color: "#1890ff" }} />
-                <p style={{ fontWeight: 600, fontSize: 20, margin: 0 }}>Invoice Report</p>
+                <p style={{ fontWeight: 600, fontSize: 20, margin: 0 }}>Invoice</p>
             </div>
 
             <Divider style={{ borderColor: "#d0cdcd", marginTop: 8 }} />
 
-            <div style={{ display: "flex", justifyContent: "center" }}>
-                <Form layout="inline" style={{ alignItems: "center", marginBottom: 20 }}>
-                    <span style={{ marginRight: 10, fontWeight: 500, fontSize: 16 }}>Invoice Date</span>
-
+            <div style={{ display: "flex", justifyContent: "center", margin: "2px 0 20px 0" }}>
+                <Form layout="inline" style={{ alignItems: "center" }}>
+                    <span style={{ marginRight: 10, fontWeight: 500, fontSize: 16 }}>INVOICE DATE</span>
                     <span style={{ marginRight: 10, fontWeight: 500, fontSize: 16 }}>From :</span>
                     <Form.Item>
                         <DatePicker
@@ -262,7 +407,6 @@ export default function EBuilling_confirmForAC() {
                             style={{ height: 40 }}
                         />
                     </Form.Item>
-
                     <span style={{ margin: "0 10px", fontWeight: 500, fontSize: 16 }}>To :</span>
                     <Form.Item>
                         <DatePicker
@@ -273,52 +417,22 @@ export default function EBuilling_confirmForAC() {
                             style={{ height: 40 }}
                         />
                     </Form.Item>
-
-
-                    <Form.Item>
-                        <Select
-                            placeholder="Select Vendor"
-                            value={vendor}
-                            onChange={setVendor}
-                            allowClear
-                            style={{ width: 220, height: 40 }}
-                            options={[
-                                { value: "%", label: "All" },
-                                { value: "V001", label: "Vendor A" },
-                                { value: "V002", label: "Vendor B" },
-                            ]}
-                        />
-                    </Form.Item>
-
                     <Form.Item>
                         <input
                             type="text"
                             placeholder="Invoice No"
                             value={InvoiceNo}
                             onChange={(e) => setInvoiceNo(e.target.value)}
-                            style={{
-                                width: 250,
-                                height: 40,
-                                padding: "0 10px",
-                                borderRadius: 4,
-                                border: "1px solid #d9d9d9",
-                            }}
+                            style={{ width: 250, height: 40, padding: "0 10px", borderRadius: 4, border: "1px solid #d9d9d9" }}
                         />
                     </Form.Item>
-
                     <Form.Item>
-                        <Button
-                            type="primary"
-                            onClick={onSearch}
-                            loading={loading}
-                            style={{ height: 40, borderRadius: 6 }}
-                        >
+                        <Button type="primary" onClick={onSearch} loading={loading} style={{ height: 40, borderRadius: 6 }}>
                             Search
                         </Button>
                     </Form.Item>
                 </Form>
             </div>
-
 
 
 
@@ -350,7 +464,7 @@ export default function EBuilling_confirmForAC() {
             </div>
 
 
-            {/* <p
+            <p
                 style={{
                     marginTop: 10,
                     display: "flex",
@@ -358,7 +472,7 @@ export default function EBuilling_confirmForAC() {
                     alignItems: "center"
                 }}
             >
-                <span style={{ color: "red" }}>*</span>&nbsp;Incharge :
+                <span style={{ color: "red" }}>*</span>&nbsp;Create By :
                 <input
                     type="text"
                     value={incharge}
@@ -375,13 +489,18 @@ export default function EBuilling_confirmForAC() {
                 />
             </p>
 
+
+
+
+
+
             {dataSource.length > 0 && (
                 <div style={{ display: "flex", justifyContent: "center", marginTop: 20 }}>
                     <Button onClick={onConfirm} style={{ backgroundColor: "#52c41a", color: "#fff", borderRadius: 6, height: 40 }}>
                         สร้างเอกสาร (ใบวางบิล)
                     </Button>
                 </div>
-            )} */}
+            )}
         </div>
     );
 }

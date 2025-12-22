@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { ColourfulText } from "../../components/ui/colourful-text";
 import { Input } from "antd";
 import { base } from "../../constants";
@@ -145,7 +146,7 @@ function LoginPage() {
                     </div>
 
                     <div className="p-3 text-2xl md:text-3xl font-bold text-black text-center">
-                        <ColourfulText text='E-BULLING SYSTEM' />
+                        <ColourfulText text='E-BILLING SYSTEM' />
                     </div>
                     <form className='max-w-full mt-5'>
                         <div className='mb-6'>

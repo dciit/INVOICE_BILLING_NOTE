@@ -26,7 +26,7 @@ const PageMenu = ({ onCloseDrawer }: PageMenuProps) => {
         ...(auth?.role !== "rol_accountant"
             ? [{
                 key: `/Invoice`,
-                label: 'Invoice Report',
+                label: 'Invoice',
                 icon: withMenuIcon(FormOutlined),
             }]
             : []

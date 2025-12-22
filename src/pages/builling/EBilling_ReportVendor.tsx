@@ -1,7 +1,7 @@
 //@ts-nocheck
 import React, { useEffect, useState } from "react";
 import { DatePicker, Button, Form, Divider, Table, Select } from "antd";
-import { FileProtectOutlined, SearchOutlined } from "@ant-design/icons";
+import { FileProtectOutlined, PrinterOutlined, SearchOutlined } from "@ant-design/icons";
 import type { Dayjs } from "dayjs";
 import service from "../../service/confirm.service";
 import { useSelector } from "react-redux";
@@ -9,7 +9,8 @@ import "../../css/InvoiceConfirm.css";
 import Swal from "sweetalert2";
 import dayjs from "dayjs";
 import isBetween from "dayjs/plugin/isBetween";
-import EBuilling_DetailModalVendor from "../modal/EBuilling_DetailModalVendor";
+import EBilling_DetailModalVendor from "../modal/EBilling_DetailModalVendor";
+import EBilling_DetailModalVendorPrint from "../modal/EBilling_DetailModalVendorPrint";
 
 dayjs.extend(isBetween);
 
@@ -33,16 +34,19 @@ interface InvoiceDetail {
     vendorname: string;
     whtax: number;
     status: string; // เพิ่ม field status
+    invoicedate: string;
+    invoiceno: string;
 }
 
-export default function EBuilling_ReportVendor() {
+export default function EBilling_ReportVendor() {
     const auth = useSelector((state: any) => state.reducer.authen);
     const [fromDate, setFromDate] = useState<Dayjs | null>(dayjs());
     const [toDate, setToDate] = useState<Dayjs | null>(dayjs());
-    const [status, setStatus] = useState<string>("CREATE");
+    const [status, setStatus] = useState<string>("WAITING");
     const [dataSource, setDataSource] = useState<InvoiceDetail[]>([]);
     const [loading, setLoading] = useState(false);
     const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+    const [isDetailModalOpenPrint, setIsDetailModalOpenPrint] = useState(false);
     const [detailRecord, setDetailRecord] = useState<InvoiceDetail | null>(null);
 
     useEffect(() => {
@@ -52,9 +56,10 @@ export default function EBuilling_ReportVendor() {
     const fetchData = async () => {
         try {
             setLoading(true);
-            const res = await service.PostReportACAndVendorHeader({ venderCode: auth.username, status: "CREATE", role: auth.role });
+            const res = await service.PostReportACAndVendorHeader({ venderCode: auth.username, status: "WAITING", role: auth.role });
             const mappedData = res.data.map((item: any, index: number) => ({ ...item, key: index }));
             setDataSource(mappedData);
+            console.log(res.data)
         } catch (error) {
             console.error(error);
         } finally {
@@ -128,6 +133,20 @@ export default function EBuilling_ReportVendor() {
                     }}
                 />
             )
+        },
+        {
+            title: "Print",
+            width: 80,
+            align: "center",
+            render: (_: any, record: InvoiceDetail) => (
+                <PrinterOutlined
+                    style={{ fontSize: 18, color: "#1890ff", cursor: "pointer" }}
+                    onClick={() => {
+                        setDetailRecord(dataSource);
+                        setIsDetailModalOpenPrint(true);
+                    }}
+                />
+            )
         }
     ];
 
@@ -148,7 +167,7 @@ export default function EBuilling_ReportVendor() {
 
             <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}>
                 <Form layout="inline">
-                    <span style={{ marginRight: 10, fontWeight: 500, fontSize: 16 }}>INVOICE DATE</span>
+                    <span style={{ marginRight: 10, fontWeight: 500, fontSize: 16 }}>Invoice Date</span>
 
                     <span style={{ marginRight: 10 }}>From :</span>
                     <Form.Item>
@@ -162,10 +181,11 @@ export default function EBuilling_ReportVendor() {
 
                     <span style={{ margin: "0 10px" }}>Status :</span>
                     <Form.Item>
-                        <Select value={status} onChange={setStatus} style={{ width: 120 }}>
+                        <Select value={status} onChange={setStatus} style={{ width: 180, height: 40 }}>
                             <Option value="%">All</Option>
-                            <Option value="CREATE">CREATE</Option>
-                            <Option value="RECEIVE">RECEIVE</Option>
+                            <Option value="WAITING">WAITING CONFIRM</Option>
+                            <Option value="CONFIRM">CONFIRM</Option>
+                            <Option value="REJECT">REJECT</Option>
                             <Option value="PAYMENT">PAYMENT</Option>
                         </Select>
                     </Form.Item>
@@ -197,15 +217,23 @@ export default function EBuilling_ReportVendor() {
                                 <Table.Summary.Cell align="right">{getGrandTotalNetPaid()}</Table.Summary.Cell>
                                 <Table.Summary.Cell></Table.Summary.Cell>
                                 <Table.Summary.Cell></Table.Summary.Cell>
+                                <Table.Summary.Cell></Table.Summary.Cell>
                             </Table.Summary.Row>
                         </Table.Summary>
                     )}
                 />
             </div>
 
-            <EBuilling_DetailModalVendor
+            <EBilling_DetailModalVendor
                 open={isDetailModalOpen}
                 onClose={() => setIsDetailModalOpen(false)}
+                invoiceDetail={detailRecord}
+                refreshData={onSearchByDateAndStatus}
+            />
+
+            <EBilling_DetailModalVendorPrint
+                open={isDetailModalOpenPrint}
+                onClose={() => setIsDetailModalOpenPrint(false)}
                 invoiceDetail={detailRecord}
                 refreshData={onSearchByDateAndStatus}
             />

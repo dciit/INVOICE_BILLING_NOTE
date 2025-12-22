@@ -8,7 +8,7 @@ import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
 import Swal from "sweetalert2";
 
-interface EBuilling_DetailModalVendorProps {
+interface EBilling_DetailModalVendorProps {
     open: boolean;
     onClose: () => void;
     refreshData: () => void;
@@ -32,6 +32,8 @@ interface EBuilling_DetailModalVendorProps {
         faxno: string;
         zipcode: string;
         telno: string;
+        invoicedate: string;
+        invoiceno: string;
     };
 }
 
@@ -49,7 +51,7 @@ interface InvoiceDetail {
     invoiceno: string;
 }
 
-const EBuilling_DetailModalVendor: React.FC<EBuilling_DetailModalVendorProps> = ({ open, onClose, invoiceDetail, refreshData }) => {
+const EBilling_DetailModalVendor: React.FC<EBilling_DetailModalVendorProps> = ({ open, onClose, invoiceDetail, refreshData }) => {
     if (!invoiceDetail) return null;
     const auth = useSelector((state: any) => state.reducer.authen);
     const [DataSource, setDataSource] = useState<InvoiceDetail[]>([]);
@@ -391,4 +393,4 @@ const EBuilling_DetailModalVendor: React.FC<EBuilling_DetailModalVendorProps> = 
     );
 };
 
-export default EBuilling_DetailModalVendor;
+export default EBilling_DetailModalVendor;

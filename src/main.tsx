@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { createContext, StrictMode } from 'react'
 import ReactDOM from 'react-dom/client'
 import './index.css'

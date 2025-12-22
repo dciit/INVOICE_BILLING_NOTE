@@ -1,3 +1,4 @@
+//@ts-nocheck
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { base, projectName, image } from "../../constants";
@@ -60,7 +61,7 @@ function ToolbarComponent() {
                 <Drawer
                     title={
                         <span className="text-black font-bold">
-                            E-BULLING SYSTEM
+                            E-BILLING SYSTEM
                         </span>
                     }
                     placement="left"
@@ -116,12 +117,16 @@ function ToolbarComponent() {
                         <span className="text-black text-lg font-bold uppercase mr-3">
                             {auth.login ? (
                                 <>
-                                    <UserOutlined /> {auth.username}
+                                    <UserOutlined />{" "}
+                                    {auth.role === "rol_accountant"
+                                        ? auth.incharge
+                                        : auth.username}
                                 </>
                             ) : (
-                                '######'
+                                "######"
                             )}
                         </span>
+
 
                         {/* <Avatar size={36} style={{ border: '1px solid #00a0e4' }} /> */}
                     </div>
