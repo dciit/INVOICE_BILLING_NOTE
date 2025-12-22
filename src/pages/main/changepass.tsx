@@ -1,16 +1,18 @@
 import { LockOutlined, UserAddOutlined } from "@ant-design/icons"
 import { Input } from "antd"
 import type { ReduxInterface } from "../../interface/main.interface";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { useEffect, useState } from "react";
 import type { Editpass } from "../../interface/mParam";
 import Swal from "sweetalert2";
 import { API_CHANGEPASS } from "../../service/authen";
+import { useNavigate } from "react-router-dom";
 
 function ChangePass() {
 
     const redux: ReduxInterface = useSelector((state: any) => state.reducer);
-
+    const navigate = useNavigate();
+    const dispatch = useDispatch();
     const [formpass, setFormPass] = useState<Editpass>({
         username: '',
         newPassword: '',
@@ -34,6 +36,11 @@ function ChangePass() {
             setAlertPass(false)
         }
     }, [confirmpass]);
+
+    const handleLogout = () => {
+        dispatch({ type: 'LOGOUT' });
+        navigate('/login');
+    };
 
     const handleChangepass = async () => {
         if (!formpass.oldPassword || !formpass.newPassword) {
@@ -60,13 +67,13 @@ function ChangePass() {
             oldPassword: formpass.oldPassword
         });
 
-        if (changepw.status == -1) {
+        if (changepw.result == -1) {
             Swal.fire({
                 icon: 'error',
                 title: 'เปลี่ยนรหัสผ่านไม่สำเร็จ',
                 text: changepw.message
             })
-        } else if (changepw.status == -2) {
+        } else if (changepw.result == -2) {
             Swal.fire({
                 icon: 'error',
                 title: 'เปลี่ยนรหัสผ่านไม่สำเร็จ',
@@ -76,6 +83,15 @@ function ChangePass() {
             Swal.fire({
                 icon: 'success',
                 title: 'เปลี่ยนรหัสผ่านสำเร็จ',
+            }).then(() => {
+                // setFormPass({
+                //     username: '',
+                //     newPassword: '',
+                //     oldPassword: ''
+                // })
+                // setNewpass('');
+                // setCfpass('');
+                handleLogout();
             })
         }
     }
@@ -153,7 +169,7 @@ function ChangePass() {
                                 className='bg-[#f7ad7d] hover:bg-[#ffd8be] focus:ring-3 focus:outline-none focus:ring-[#608BC1] font-bold rounded-lg border-black text-black text-lg md:text-xl w-full sm:w-auto px-6 py-5 md:px-44 md:py-2 text-center'
                                 onClick={handleChangepass}
                             >
-                                REGISTER
+                                CHANGE PASSWORD
                             </button>
                         </div>
                     </div>

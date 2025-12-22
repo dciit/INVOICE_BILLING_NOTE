@@ -2,12 +2,12 @@ export interface RequestRegis {
     username: string;
     password: string;
     usertype: string;
-    incharge: string;
-    email: string;
-    tel: string;
-    textid: string;
-    fax: string;
-    address: string;
+    incharge?: string;
+    email?: string;
+    tel?: string;
+    textid?: string;
+    fax?: string;
+    address?: string;
     role: string;
 }
 export interface GetToken {
@@ -25,4 +25,14 @@ export interface Editpass {
     username: string;
     oldPassword: string;
     newPassword: string;
+}
+
+export interface CrCalendar {
+    cldYear: string;
+    cldMonth: string;
+    billingStart: string;
+    billingEnd: string;
+    paymentStart?: string | null;
+    paymentEnd?: string | null;
+    crBy: string;
 }

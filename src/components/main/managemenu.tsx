@@ -1,6 +1,7 @@
 import { Menu, type MenuProps } from "antd";
-import { LogoutOutlined, UserAddOutlined, UserSwitchOutlined } from "@ant-design/icons";
+import { LogoutOutlined, SettingOutlined, UserAddOutlined, UserSwitchOutlined } from "@ant-design/icons";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
 
 type MenuItem = Required<MenuProps>["items"][number];
 
@@ -8,45 +9,50 @@ const withMenuIcon = (Icon: React.ElementType) => {
     return <span className="text-sm font-bold text-white"><Icon /></span>
 };
 
-const menuItems: MenuItem[] = [
-    {
-        key: 'Register',
-        label: 'Register',
-        icon: withMenuIcon(UserAddOutlined),
-    },
-    {
-        key: 'Change Password',
-        label: 'Change Password',
-        icon: withMenuIcon(UserSwitchOutlined),
-    },
-    {
-        key: 'Log Out',
-        label: 'Log Out',
-        icon: withMenuIcon(LogoutOutlined),
-    }
-];
 
 interface ManageMenuProps {
     handleLogout: () => void;
     onCloseDrawer: () => void;
 }
 
-const ManageMenu = ({ handleLogout, onCloseDrawer }: ManageMenuProps) => {
+const ManageMenu = ({ onCloseDrawer, handleLogout  }: ManageMenuProps) => {
     const location = useLocation();
     const navigate = useNavigate();
+    const auth = useSelector((state: any) => state.reducer.authen);
+    const isAdmin = auth?.role === "rol_admin" || auth?.role === "rol_accountant";
+
+
+    const menuItems: MenuItem[] = [
+        ...(isAdmin
+            ? [{
+                key: '/register',
+                label: 'Register',
+                icon: withMenuIcon(UserAddOutlined),
+            }] : []),
+        {
+            key: '/accountsetting',
+            label: 'Account Setting',
+            icon: withMenuIcon(SettingOutlined)
+        },
+        {
+            key: '/changepass',
+            label: 'Change Password',
+            icon: withMenuIcon(UserSwitchOutlined),
+        },
+        {
+            key: 'logout',
+            label: 'Log Out',
+            icon: withMenuIcon(LogoutOutlined),
+        }
+    ];
 
     const handleClick: MenuProps['onClick'] = (e) => {
-        if (e.key === 'Log Out') {
+        if (e.key === 'logout') {
             handleLogout();
+        } else {
+            navigate(e.key);
         }
-        else if (e.key === 'Change Password') {
-            navigate('/changepass');
-        }
-        else if (e.key === 'Register') {
-            navigate("/register");
-        }
-
-        onCloseDrawer(); // ← ปิด Drawer ทุกครั้งที่เลือกเมนู
+        onCloseDrawer();
     };
 
     return (

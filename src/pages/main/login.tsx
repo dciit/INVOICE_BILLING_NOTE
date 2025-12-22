@@ -141,7 +141,7 @@ function LoginPage() {
                     </div>
 
                     <div className="p-3 text-2xl md:text-3xl font-bold text-black text-center">
-                        <ColourfulText text='INVOICE BILLINGNOTE SYSTEM' />
+                        <ColourfulText text='BILLINGN SYSTEM' />
                     </div>
                     <form className='max-w-full mt-5'>
                         <div className='mb-6'>
