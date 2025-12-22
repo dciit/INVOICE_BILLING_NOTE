@@ -7,8 +7,9 @@ import EBilling_confirm from "./pages/builling/EBilling_confirm";
 import EBilling_ReportVendor from "./pages/builling/EBilling_ReportVendor";
 import EBilling_ReportAC from "./pages/builling/EBilling_ReportAC";
 import ChangePass from "./pages/main/changepass";
-import CalendarBulling from "./pages/invoice/calendar_bulling";
 import EBilling_confirmForAC from "./pages/builling/EBilling_confirmForAC";
+import CalendarBulling from "./pages/builling/Calendar_Blling";
+import Accountsetting from "./pages/main/accountsetting";
 
 
 function Routers() {
@@ -27,6 +28,7 @@ function Routers() {
                     <Route path="ReportAC" element={<EBilling_ReportAC />} />
                     <Route path="changepass" element={<ChangePass />} />
                     <Route path="calendarbulling" element={<CalendarBulling />} />
+                    <Route path="accountsetting" element={<Accountsetting/>} />
                 </Route>
             </Routes>
         </Router>

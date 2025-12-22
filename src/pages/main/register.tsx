@@ -1,11 +1,6 @@
 //@ts-nocheck
 import {
-    EnvironmentOutlined,
-    InfoOutlined,
     LockOutlined,
-    MailOutlined,
-    PhoneOutlined,
-    PrinterOutlined,
     UserAddOutlined,
     UserOutlined
 } from '@ant-design/icons';
@@ -15,7 +10,6 @@ import { useEffect, useState } from "react";
 import type { RequestRegis } from "../../interface/mParam";
 import Swal from "sweetalert2";
 import { API_REQUEST_REGISTER } from "../../service/authen";
-import { base } from "../../constants";
 
 function Register() {
 
@@ -42,25 +36,39 @@ function Register() {
         setRegisterData(prev => ({
             ...prev,
             role,
-            usertype: role
+            usertype: role,
+            password: role === "VENDER" ? "999999" : ""
         }));
+        console.log('selected role:', role)
     }, [role]);
 
     const handleRegisterUser = async () => {
-        console.log(registerData)
-        if (registerData.username === '' ||
-            registerData.password === '' ||
-            registerData.incharge === '' ||
-            registerData.usertype === '' ||
-            registerData.role === '') {
-            Swal.fire({
-                icon: 'warning',
-                title: 'ลงทะเบียนไม่สำเร็จ',
-                text: 'กรุณากรอกข้อมูลให้ครบถ้วนก่อนทำการลงทะเบียน.'
-            })
+        if (role == "VENDER") {
+            if (registerData.username === '' ||
+                registerData.usertype === '' ||
+                registerData.role === '') {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'ลงทะเบียนไม่สำเร็จ',
+                    text: 'กรุณากรอกข้อมูลให้ครบถ้วนก่อนทำการลงทะเบียน.'
+                })
+            }
+        }
+        else {
+            if (registerData.username === '' ||
+                registerData.password === '' ||
+                registerData.usertype === '' ||
+                registerData.role === '') {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'ลงทะเบียนไม่สำเร็จ',
+                    text: 'กรุณากรอกข้อมูลให้ครบถ้วนก่อนทำการลงทะเบียน.'
+                })
+            }
         }
 
         const regis = await API_REQUEST_REGISTER(registerData);
+        console.log(registerData);
 
         if (regis.status == -1) {
             Swal.fire({
@@ -114,14 +122,14 @@ function Register() {
                                             className='text-sm p-2 md:text-sm border border-black rounded-md bg-[#FFF5D7] font-normal text-black flex items-center gap-2 w-[10rem]'
                                         >
                                             <UserOutlined />
-                                            USERNAME
+                                            {role == "VENDER" ? ("TEXX ID") : ("USERNAME")}
                                         </label>
                                         <Input
                                             type='text'
                                             id='username'
                                             placeholder='Enter Username'
                                             className="w-full text-sm md:text-sm p-2"
-                                            maxLength={5}
+                                            // maxLength={5}
                                             value={registerData.username.toLocaleUpperCase()}
                                             onChange={(e) => setRegisterData({ ...registerData, username: e.target.value })}
                                         // autoFocus onKeyDown={handleKeyPress}
@@ -129,155 +137,28 @@ function Register() {
                                     </div>
                                 </div>
                                 {/* password */}
-                                <div className='mt-4'>
-                                    <div className='flex flex-col md:flex-row gap-2'>
-                                        <label
-                                            htmlFor="password"
-                                            className='text-sm p-2 md:text-sm border border-black rounded-md bg-[#FFF5D7] font-normal text-black flex items-center gap-2 w-[10rem]'
-                                        >
-                                            <LockOutlined />
-                                            PASSWORD
-                                        </label>
-                                        <Input
-                                            // ref={refPass}
-                                            type='password'
-                                            id='password'
-                                            placeholder='*******'
-                                            className="w-full text-sm p-2"
-                                            value={registerData.password}
-                                            onChange={(e) => setRegisterData({ ...registerData, password: e.target.value })}
-                                        // autoFocus onKeyDown={handleKeyPress}
-                                        />
+                                {role != "VENDER" && (
+                                    <div className='mt-4'>
+                                        <div className='flex flex-col md:flex-row gap-2'>
+                                            <label
+                                                htmlFor="password"
+                                                className='text-sm p-2 md:text-sm border border-black rounded-md bg-[#FFF5D7] font-normal text-black flex items-center gap-2 w-[10rem]'
+                                            >
+                                                <LockOutlined />
+                                                PASSWORD
+                                            </label>
+                                            <Input
+                                                // ref={refPass}
+                                                type='password'
+                                                id='password'
+                                                placeholder='*******'
+                                                className="w-full text-sm p-2"
+                                                value={registerData.password}
+                                                onChange={(e) => setRegisterData({ ...registerData, password: e.target.value })}
+                                            // autoFocus onKeyDown={handleKeyPress}
+                                            />
+                                        </div>
                                     </div>
-                                </div>
-                                {/* name */}
-                                <div className='mt-4'>
-                                    <div className='flex flex-col md:flex-row gap-2'>
-                                        <label
-                                            htmlFor="incharge"
-                                            className='text-sm p-2 md:text-sm border border-black rounded-md bg-[#FFF5D7] font-normal text-black flex items-center gap-2 font-sans w-[10rem]'
-                                        >
-                                            <UserOutlined />
-                                            INCHARGE
-                                        </label>
-                                        <Input
-                                            type='text'
-                                            id='incharge'
-                                            placeholder='Enter Incharge'
-                                            className="w-full text-sm md:text-sm p-2"
-                                            value={registerData.incharge.toLocaleUpperCase()}
-                                            onChange={(e) => setRegisterData({ ...registerData, incharge: e.target.value.toUpperCase() })}
-                                        // autoFocus
-                                        // onKeyDown={handleKeyPress}
-                                        />
-                                    </div>
-                                </div>
-                                {role === "VENDER" && (
-                                    <>
-                                        {/* email */}
-                                        < div className='mt-4'>
-                                            <div className='flex flex-col md:flex-row gap-2'>
-                                                <label
-                                                    htmlFor="email"
-                                                    className='text-sm p-2 md:text-sm border border-black rounded-md bg-[#FFF5D7] font-normal text-black flex items-center gap-2 w-[10rem]'
-                                                >
-                                                    <MailOutlined />
-                                                    EMAIL
-                                                </label>
-                                                <Input
-                                                    type='text'
-                                                    id='email'
-                                                    placeholder='Enter Email'
-                                                    className="w-full text-sm md:text-sm p-2"
-                                                    value={registerData.email}
-                                                    onChange={(e) => setRegisterData({ ...registerData, email: e.target.value })}
-                                                // autoFocus onKeyDown={handleKeyPress}
-                                                />
-                                            </div>
-                                        </div>
-                                        {/* text id */}
-                                        <div className='mt-4'>
-                                            <div className='flex flex-col md:flex-row gap-2'>
-                                                <label
-                                                    htmlFor="textid"
-                                                    className='text-sm p-2 md:text-sm border border-black rounded-md bg-[#FFF5D7] font-normal text-black flex items-center gap-2 w-[10rem]'
-                                                >
-                                                    <InfoOutlined />
-                                                    TEXT ID
-                                                </label>
-                                                <Input
-                                                    type='text'
-                                                    id='textid'
-                                                    placeholder='Enter TextID'
-                                                    className="w-full text-sm md:text-sm p-2"
-                                                    value={registerData.textid}
-                                                    onChange={(e) => setRegisterData({ ...registerData, textid: e.target.value })}
-                                                // autoFocus onKeyDown={handleKeyPress}
-                                                />
-                                            </div>
-                                        </div>
-                                        {/* fax */}
-                                        <div className='mt-4'>
-                                            <div className='flex flex-col md:flex-row gap-2'>
-                                                <label
-                                                    htmlFor="fax"
-                                                    className='text-sm p-2 md:text-sm border border-black rounded-md bg-[#FFF5D7] font-normal text-black flex items-center gap-2 w-[10rem]'
-                                                >
-                                                    <PrinterOutlined />
-                                                    FAX
-                                                </label>
-                                                <Input
-                                                    type='text'
-                                                    id='fax'
-                                                    placeholder='Enter Fax'
-                                                    className="w-full text-sm md:text-sm p-2"
-                                                    value={registerData.fax}
-                                                    onChange={(e) => setRegisterData({ ...registerData, fax: e.target.value })}
-                                                // autoFocus onKeyDown={handleKeyPress}
-                                                />
-                                            </div>
-                                        </div>
-                                        {/* tel */}
-                                        <div className='mt-4'>
-                                            <div className='flex flex-col md:flex-row gap-2'>
-                                                <label
-                                                    htmlFor="tel"
-                                                    className='text-sm p-2 md:text-sm border border-black rounded-md bg-[#FFF5D7] font-normal text-black flex items-center gap-2 w-[10rem]'
-                                                >
-                                                    <PhoneOutlined />
-                                                    Tel
-                                                </label>
-                                                <Input
-                                                    type='text'
-                                                    id='tel'
-                                                    placeholder='Enter Tel'
-                                                    className="w-full text-sm md:text-sm p-2"
-                                                    value={registerData.tel}
-                                                    onChange={(e) => setRegisterData({ ...registerData, tel: e.target.value })}
-                                                // autoFocus onKeyDown={handleKeyPress}
-                                                />
-                                            </div>
-                                        </div>
-                                        {/* address */}
-                                        <div className='mt-4'>
-                                            <div className='flex flex-col md:flex-row gap-2'>
-                                                <label
-                                                    htmlFor='address'
-                                                    className='text-sm p-2 md:text-sm border border-black rounded-md bg-[#FFF5DF] font-normal text-black flex items-center ga-2 w-[10rem]'
-                                                >
-                                                    <EnvironmentOutlined />
-                                                    Address
-                                                </label>
-                                                <Input.TextArea
-                                                    id='address'
-                                                    placeholder='Enter Address'
-                                                    className='w-full text-sm p-2'
-                                                    value={registerData.address}
-                                                    onChange={(e) => setRegisterData({ ...registerData, address: e.target.value })}
-                                                />
-                                            </div>
-                                        </div>
-                                    </>
                                 )}
                                 <div>
                                     <Radio.Group
@@ -314,12 +195,7 @@ function Register() {
                             </button>
                         </div>
                     </div>
-                    {/* list name vender */}
-                    {/* <div className="border border-gray-400 rounded-lg w-4/5 p-3">
-
-                    </div> */}
                 </div>
-
             </div >
         </div >
 

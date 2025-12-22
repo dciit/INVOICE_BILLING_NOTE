@@ -28,11 +28,11 @@ function ToolbarComponent() {
     }
 
     const handleLogout = () => {
-        if (confirm('คุณต้องการออกจากระบบใช่หรือไม่?')) {
-            dispatch({ type: 'LOGOUT' });
-            navigate(`/login`);
-        }
-    }
+    localStorage.removeItem('token');
+    dispatch({ type: 'LOGOUT' });
+    navigate('/login', { replace: true });
+};
+
 
     const toggleDrawer = (newOpen: boolean) => {
         setOpenDrawer(newOpen);

@@ -8,3 +8,9 @@ export interface ResLogin {
     vendername: string;
     role: string
 }
+
+export interface BankAccount {
+    accountcode: string;
+    account: string;
+    accountname: string;
+}

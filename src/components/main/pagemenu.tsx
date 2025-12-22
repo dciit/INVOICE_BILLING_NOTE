@@ -1,5 +1,5 @@
 import { Menu, type MenuProps } from "antd";
-import { CalendarOutlined, FileProtectOutlined, FormOutlined } from "@ant-design/icons";
+import { CalendarOutlined, FileProtectOutlined, FileTextOutlined, FormOutlined } from "@ant-design/icons";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 
@@ -55,8 +55,13 @@ const PageMenu = ({ onCloseDrawer }: PageMenuProps) => {
         {
             key: `/calendarbulling`,
             label: 'Calendar Bulling Note',
-            icon: withMenuIcon(CalendarOutlined),
+            icon: withMenuIcon(CalendarOutlined)
         },
+        {
+            key: '/',
+            label: 'Manual',
+            icon: withMenuIcon(FileTextOutlined)
+        }
     ];
 
 
