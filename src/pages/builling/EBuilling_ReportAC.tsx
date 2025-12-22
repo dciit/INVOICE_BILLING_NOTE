@@ -19,7 +19,6 @@ const { Option } = Select;
 
 interface InvoiceDetail {
     key: React.Key;
-    address: string;
     billerby: string;
     billerdate: string;
     date: string;
@@ -35,6 +34,11 @@ interface InvoiceDetail {
     vendorname: string;
     whtax: number;
     status: string;
+    addreS1: string;
+    addreS2: string;
+    faxno: string;
+    zipcode: string;
+    telno: string;
 }
 
 export default function EBuilling_ReportAC() {
@@ -59,6 +63,8 @@ export default function EBuilling_ReportAC() {
             const res = await service.PostReportACHeader({ status: "%", role: auth.role });
             const mappedData = res.data.map((item: any, index: number) => ({ ...item, key: index }));
             setDataSource(mappedData);
+
+            console.log(mappedData)
         } catch (error) {
             console.error(error);
         } finally {
@@ -164,7 +170,7 @@ export default function EBuilling_ReportAC() {
         <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
             <div style={{ display: "flex", alignItems: "center" }}>
                 <FileProtectOutlined style={{ fontSize: 28, marginRight: 10, color: "#1890ff" }} />
-                <p style={{ fontWeight: 600, fontSize: 20 }}>Report AC</p>
+                <p style={{ fontWeight: 600, fontSize: 20 }}>Report</p>
             </div>
 
             <Divider style={{ borderColor: "#d0cdcd", marginTop: 8 }} />
@@ -189,7 +195,6 @@ export default function EBuilling_ReportAC() {
                             <Option value="%">All</Option>
                             <Option value="CREATE">CREATE</Option>
                             <Option value="RECEIVE">RECEIVE</Option>
-                            <Option value="REJECT">REJECT</Option>
                             <Option value="PAYMENT">PAYMENT</Option>
                         </Select>
                     </Form.Item>

@@ -22,19 +22,28 @@ const PageMenu = ({ onCloseDrawer }: PageMenuProps) => {
     const navigate = useNavigate();
     const auth = useSelector((state: any) => state.reducer.authen);
 
-
     const menuItems: MenuItem[] = [
-        {
-            key: `/confirm`,
-            label: 'Confirm Invoice',
-            icon: withMenuIcon(FormOutlined),
-        },
+        ...(auth?.role !== "rol_accountant"
+            ? [{
+                key: `/Invoice`,
+                label: 'Invoice Report',
+                icon: withMenuIcon(FormOutlined),
+            }]
+            : []
+        ),
+        ...(auth?.role === "rol_accountant"
+            ? [{
+                key: `/Invoices`,
+                label: 'Invoice Report',
+                icon: withMenuIcon(FormOutlined),
+            }]
+            : []
+        ),
         {
             key: `/ReportVendor`,
-            label: 'Report Vendor',
+            label: auth?.role === "rol_accountant" ? 'Confirm Invoice' : 'Report',
             icon: withMenuIcon(FileProtectOutlined),
         },
-        
         ...(auth?.role === "rol_accountant"
             ? [{
                 key: `/ReportAC`,
@@ -54,6 +63,7 @@ const PageMenu = ({ onCloseDrawer }: PageMenuProps) => {
             icon: withMenuIcon(FileTextOutlined)
         }
     ];
+
 
 
     const handleClick: MenuProps['onClick'] = (e) => {

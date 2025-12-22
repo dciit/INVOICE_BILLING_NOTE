@@ -13,7 +13,6 @@ interface EBuilling_DetailModalVendorProps {
     onClose: () => void;
     refreshData: () => void;
     invoiceDetail?: {
-        address: string;
         billerby: string;
         billerdate: string;
         date: string;
@@ -28,6 +27,11 @@ interface EBuilling_DetailModalVendorProps {
         vendorcode: string;
         vendorname: string;
         whtax: number;
+        addreS1: string;
+        addreS2: string;
+        faxno: string;
+        zipcode: string;
+        telno: string;
     };
 }
 
@@ -132,39 +136,6 @@ const EBuilling_DetailModalVendor: React.FC<EBuilling_DetailModalVendorProps> = 
     };
 
 
-    const Rejectbilling = async () => {
-        try {
-            setLoading(true);
-
-            const invoiceNoList = DataSource.map(item => `'${item.invoiceno}'`).join(",");
-            const invoiceNoForIn = `(${invoiceNoList})`;
-
-            await service.PostRejectbilling({
-                invoiceNo: invoiceNoForIn,
-                receiveBy: auth.username.trim()
-            });
-
-
-            Swal.fire(
-                'สำเร็จ!',
-                'เอกสารถูกตีกลับแล้ว',
-                'success'
-            );
-
-            refreshData();
-
-        } catch (error) {
-            console.error(error);
-            Swal.fire(
-                'ล้มเหลว!',
-                error.message || 'ไม่สามารถบันทึกข้อมูลได้',
-                'error'
-            );
-        } finally {
-            setLoading(false);
-        }
-    };
-
 
 
     const thStyle = { border: "1px solid #333", padding: "8px" };
@@ -211,7 +182,7 @@ const EBuilling_DetailModalVendor: React.FC<EBuilling_DetailModalVendorProps> = 
 
                 <div style={{
                     display: "grid",
-                    gridTemplateColumns: "3fr 1fr",
+                    gridTemplateColumns: "2fr 1fr",
                     columnGap: "20px",
                     lineHeight: "1.6",
                     width: "100%"
@@ -223,13 +194,26 @@ const EBuilling_DetailModalVendor: React.FC<EBuilling_DetailModalVendorProps> = 
                             </span>
                             {invoiceDetail.vendorname}
                         </p>
-                        <p style={{ margin: 0, fontSize: 16 }}>
-                            <span style={{ display: "inline-block", width: 130 }}>
-                                <b>ที่อยู่ / Address :</b>
+                        <p style={{ margin: "5px 0 0 0" }}>
+                            <span style={{ display: "inline-block", width: 130, fontWeight: "bold" }}>
+                                ที่อยู่ / Address :
                             </span>
-                            {invoiceDetail.address}
+                            {invoiceDetail.addreS1}
+                        </p>
+                        <p style={{ margin: "5px 0 0 0" }}>
+                            <span style={{ display: "inline-block", width: 130 }}></span>
+                            <span>
+                                {invoiceDetail.addreS2} &nbsp;  {invoiceDetail.zipcode}
+                            </span>
+                        </p>
+                        <p style={{ margin: "5px 0 0 0" }}>
+                            <span style={{ display: "inline-block", width: 130 }}></span>
+                            <span>
+                                Tel. {invoiceDetail.telno} &nbsp;&nbsp; Fax. {invoiceDetail.faxno}
+                            </span>
                         </p>
                     </div>
+
 
                     <div>
                         <p style={{ margin: 0, fontSize: 16 }}>
@@ -330,7 +314,7 @@ const EBuilling_DetailModalVendor: React.FC<EBuilling_DetailModalVendorProps> = 
                         </div>
                     </div>
 
-                    <div style={{ textAlign: "right" }}>
+                    <div style={{ textAlign: "left" }}>
                         <div style={{ fontSize: 16, marginBottom: 8 }}>
                             <b>ผู้วางบิล :</b>
                             <span style={{
@@ -358,55 +342,36 @@ const EBuilling_DetailModalVendor: React.FC<EBuilling_DetailModalVendorProps> = 
             </div>
 
 
+
             <div
                 style={{
                     position: "relative",
                     marginTop: 20,
                     height: 48,
                     display: "flex",
-                    justifyContent: "space-between",
                     alignItems: "center",
-                    padding: "0 16px"
+                    padding: "0 16px",
                 }}
             >
-                {auth.role === "rol_accountant" && (
-                    <>
-                        <Button
-                            type="primary"
-                            size="large"
-                            onClick={Rejectbilling}
-                            disabled={loading}
-                            style={{
-                                backgroundColor: "#ff4d4f",
-                                borderColor: "#ff4d4f",
-                                height: 38,
-                                fontSize: 14,
-                                padding: "0 36px",
-                                fontWeight: "bold",
-                                pointerEvents: loading ? "none" : "auto"
-                            }}
-                        >
-                            Reject
-                        </Button>
-
-                        <Button
-                            type="primary"
-                            size="large"
-                            onClick={receivebilling}
-                            disabled={loading}
-                            style={{
-                                backgroundColor: "#52c41a",
-                                borderColor: "#52c41a",
-                                height: 38,
-                                fontSize: 14,
-                                padding: "0 36px",
-                                fontWeight: "bold",
-                                pointerEvents: loading ? "none" : "auto"
-                            }}
-                        >
-                            {loading ? "กำลังประมวลผล..." : "รับวางบิล"}
-                        </Button>
-                    </>
+                {auth.role === "rol_accountant" && invoiceDetail.receiveD_BILLERBY === "" && (
+                    <Button
+                        type="primary"
+                        size="large"
+                        onClick={receivebilling}
+                        disabled={loading}
+                        style={{
+                            backgroundColor: "#52c41a",
+                            borderColor: "#52c41a",
+                            height: 38,
+                            fontSize: 14,
+                            padding: "0 36px",
+                            fontWeight: "bold",
+                            pointerEvents: loading ? "none" : "auto",
+                            marginLeft: "auto", // ✅ ทำให้ปุ่มอยู่ขวา
+                        }}
+                    >
+                        {loading ? "กำลังประมวลผล..." : "รับวางบิล"}
+                    </Button>
                 )}
 
                 {loading && (
@@ -415,12 +380,11 @@ const EBuilling_DetailModalVendor: React.FC<EBuilling_DetailModalVendorProps> = 
                             position: "absolute",
                             inset: 0,
                             backgroundColor: "rgba(255,255,255,0.5)",
-                            zIndex: 2
+                            zIndex: 2,
                         }}
                     />
                 )}
             </div>
-
 
 
         </Modal>
