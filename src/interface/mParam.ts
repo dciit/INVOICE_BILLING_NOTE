@@ -25,6 +25,7 @@ export interface Editpass {
     username: string;
     oldPassword: string;
     newPassword: string;
+    confirmPassword: string;
 }
 
 export interface CrCalendar {

@@ -70,25 +70,31 @@ function LoginPage() {
             });
             console.log(gettoken)
 
-            if (!gettoken || gettoken.status) {
+            if (gettoken.result === -2 || gettoken.result === -5) {
                 Swal.fire({
                     icon: 'error',
                     title: 'เข้าสู่ระบบไม่สำเร็จ',
-                    text: 'ไม่สามารถรับ token จากระบบได้',
+                    text: gettoken.message
                 });
                 return;
-            } else if (gettoken.status == -2) {
+            }
+
+            if (!gettoken) {
                 Swal.fire({
                     icon: 'error',
                     title: 'เข้าสู่ระบบไม่สำเร็จ',
-                    text: gettoken.message
-                })
-            } else if (gettoken.status == -3) {
+                    text: 'ไม่สามารถเชื่อมต่อระบบ token ได้'
+                });
+                return;
+            }
+
+            if (!gettoken.result) {
                 Swal.fire({
                     icon: 'error',
                     title: 'เข้าสู่ระบบไม่สำเร็จ',
-                    text: gettoken.message
-                })
+                    text: 'ไม่พบ token'
+                });
+                return;
             }
 
             const reslogin: ResLogin = await API_LOGIN({
@@ -115,6 +121,18 @@ function LoginPage() {
                 });
                 localStorage.setItem('token', token);
                 navigate(`${base}/homepage`)
+            } else if (reslogin.result === -1) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'ไม่สามารถเข้าสู่ระบบได้',
+                    text: reslogin.message
+                })
+            } else if (reslogin.result === -2) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'ไม่สามารถเข้าสู่ระบบได้',
+                    text: reslogin.message
+                })
             } else {
                 Swal.fire({
                     icon: 'error',
