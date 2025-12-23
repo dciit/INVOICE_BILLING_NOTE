@@ -5,7 +5,6 @@ import { useState } from "react";
 import type { ReduxInterface } from "../../interface/main.interface";
 import { useSelector } from "react-redux";
 import { API_CREATECALENDARBILLING } from "../../service/infobilling.service";
-import type { CrCalendar } from "../../interface/mParam";
 import Swal from "sweetalert2";
 
 

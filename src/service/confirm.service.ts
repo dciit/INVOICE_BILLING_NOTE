@@ -4,6 +4,10 @@ const getNbr = () => {
     return http.apiConfirm.get(`getNbr`);
 }
 
+const getVendor = () => {
+    return http.apiConfirm.get(`getVendor`);
+}
+
 const PostSearchInvoiceRequet = (param: any) => {
     return http.apiConfirm.post("PostSearchInvoiceRequet", param);
 }
@@ -45,6 +49,7 @@ const PostReportVendorDetailPrint = (param: any) => {
 
 export default {
     getNbr,
+    getVendor,
     PostSearchInvoiceRequet,
     PostCreateInvoice,
     PostReportACAndVendorHeader,

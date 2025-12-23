@@ -1,5 +1,5 @@
 import { Menu, type MenuProps } from "antd";
-import { CalendarOutlined, FileProtectOutlined, FileTextOutlined, FormOutlined } from "@ant-design/icons";
+import { CalendarOutlined, DollarOutlined, FileProtectOutlined, FileTextOutlined, FormOutlined, ReadOutlined } from "@ant-design/icons";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 
@@ -41,26 +41,26 @@ const PageMenu = ({ onCloseDrawer }: PageMenuProps) => {
         ),
         {
             key: `/ReportVendor`,
-            label: auth?.role === "rol_accountant" ? 'Confirm Invoice' : 'Report',
+            label: auth?.role === "rol_accountant" ? 'E-Billing' : 'E-Billing',
             icon: withMenuIcon(FileProtectOutlined),
         },
         ...(auth?.role === "rol_accountant"
             ? [{
                 key: `/ReportAC`,
-                label: 'Report AC',
-                icon: withMenuIcon(FileProtectOutlined),
+                label: 'Payment',
+                icon: withMenuIcon(DollarOutlined),
             }]
             : []
         ),
         {
             key: `/calendarbulling`,
-            label: 'Calendar Bulling Note',
+            label: 'Calendar Billing Note',
             icon: withMenuIcon(CalendarOutlined)
         },
         {
             key: '/',
             label: 'Manual',
-            icon: withMenuIcon(FileTextOutlined)
+            icon: withMenuIcon(ReadOutlined)
         }
     ];
 

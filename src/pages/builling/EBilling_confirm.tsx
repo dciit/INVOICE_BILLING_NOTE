@@ -32,7 +32,7 @@ export type MData = {
 
 export default function EBilling_confirm() {
     const auth = useSelector((state: any) => state.reducer.authen);
-    const [fromDate, setFromDate] = useState<Dayjs | null>(dayjs());
+    const [fromDate, setFromDate] = useState<Dayjs | null>(dayjs().startOf("month"));
     const [toDate, setToDate] = useState<Dayjs | null>(dayjs());
     const [selectedKeys, setSelectedKeys] = useState<React.Key[]>([]);
     const [dataSource, setDataSource] = useState<MData[]>([]);
@@ -52,8 +52,8 @@ export default function EBilling_confirm() {
             const res = await service.PostSearchInvoiceRequet({
                 venderCode: auth.username,
                 invoiceNo: InvoiceNo,
-                invoiceDateFrom: "",
-                invoiceDateTo: ""
+                invoiceDateFrom: fromDate.format("YYYYMMDD"),
+                invoiceDateTo: toDate.format("YYYYMMDD")
             });
             const mappedData = res.data.map((item: any, index: number) => ({
                 ...item,
@@ -396,7 +396,7 @@ export default function EBilling_confirm() {
 
             <div style={{ display: "flex", justifyContent: "center", margin: "2px 0 20px 0" }}>
                 <Form layout="inline" style={{ alignItems: "center" }}>
-                    <span style={{ marginRight: 10, fontWeight: 500, fontSize: 16 }}>INVOICE DATE</span>
+                    <span style={{ marginRight: 10, fontWeight: 500, fontSize: 16 }}>Invoice date :</span>
                     <span style={{ marginRight: 10, fontWeight: 500, fontSize: 16 }}>From :</span>
                     <Form.Item>
                         <DatePicker
@@ -417,6 +417,7 @@ export default function EBilling_confirm() {
                             style={{ height: 40 }}
                         />
                     </Form.Item>
+                    <span style={{ margin: "0 10px", fontWeight: 500, fontSize: 16 }}>Invoice No :</span>
                     <Form.Item>
                         <input
                             type="text"

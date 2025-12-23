@@ -110,7 +110,7 @@ const EBilling_DetailModalVendor: React.FC<EBilling_DetailModalVendorProps> = ({
 
             await service.PostReceivebilling({
                 invoiceNo: invoiceNoForIn,
-                receiveBy: auth.username.trim()
+                receiveBy: auth.incharge.trim()
             });
 
 

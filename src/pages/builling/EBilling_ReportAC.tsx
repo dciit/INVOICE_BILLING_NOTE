@@ -1,7 +1,7 @@
 //@ts-nocheck
 import React, { useEffect, useState } from "react";
 import { DatePicker, Button, Form, Divider, Table, Select } from "antd";
-import { FileProtectOutlined, SearchOutlined } from "@ant-design/icons";
+import { FileProtectOutlined, SearchOutlined, DollarOutlined } from "@ant-design/icons";
 import type { Dayjs } from "dayjs";
 import service from "../../service/confirm.service";
 import { useSelector } from "react-redux";
@@ -43,7 +43,7 @@ interface InvoiceDetail {
 
 export default function EBilling_ReportAC() {
     const auth = useSelector((state: any) => state.reducer.authen);
-    const [fromDate, setFromDate] = useState<Dayjs | null>(dayjs());
+    const [fromDate, setFromDate] = useState<Dayjs | null>(dayjs().startOf("month"));
     const [toDate, setToDate] = useState<Dayjs | null>(dayjs());
     const [dataSource, setDataSource] = useState<InvoiceDetail[]>([]);
     const [loading, setLoading] = useState(false);
@@ -51,7 +51,7 @@ export default function EBilling_ReportAC() {
     const [isDetailModalOpenPrint, setIsDetailModalOpenPrint] = useState(false);
     const [detailRecordDetail, setDetailRecordDetail] = useState<InvoiceDetail | null>(null);
     const [detailRecordPrint, setDetailRecordPrint] = useState<InvoiceDetail | null>(null);
-    const [status, setStatus] = useState<string>("%");
+    const [status, setStatus] = useState<string>("CONFIRM");
 
     useEffect(() => {
         fetchData();
@@ -60,7 +60,10 @@ export default function EBilling_ReportAC() {
     const fetchData = async () => {
         try {
             setLoading(true);
-            const res = await service.PostReportACHeader({ status: "%", role: auth.role });
+            const res = await service.PostReportACHeader({
+                status: "CONFIRM", role: auth.role, invoiceDateFrom: fromDate.format("YYYY-MM-DD"),
+                invoiceDateTo: toDate.format("YYYY-MM-DD"),
+            });
             const mappedData = res.data.map((item: any, index: number) => ({ ...item, key: index }));
             setDataSource(mappedData);
 
@@ -168,55 +171,120 @@ export default function EBilling_ReportAC() {
     return (
         <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
             <div style={{ display: "flex", alignItems: "center" }}>
-                <FileProtectOutlined style={{ fontSize: 28, marginRight: 10, color: "#1890ff" }} />
-                <p style={{ fontWeight: 600, fontSize: 20 }}>Report</p>
+                <DollarOutlined style={{ fontSize: 28, marginRight: 10, color: "#1890ff" }} />
+                <p style={{ fontWeight: 600, fontSize: 20 }}>Payment</p>
             </div>
 
             <Divider style={{ borderColor: "#d0cdcd", marginTop: 8 }} />
 
             <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}>
-                <Form layout="inline">
-                    <span style={{ marginRight: 10, fontWeight: 500, fontSize: 16 }}>Invoice Date</span>
+                <Form layout="inline" style={{ alignItems: "center" }}>
 
-                    <span style={{ marginRight: 10 }}>From :</span>
-                    <Form.Item>
-                        <DatePicker format="DD/MM/YYYY" value={fromDate} onChange={setFromDate} style={{ height: 40 }} />
+                    <Form.Item style={{ marginRight: 10, fontWeight: 500, fontSize: 16, height: 40, display: "flex", alignItems: "center" }}>
+                        Invoice Date
                     </Form.Item>
 
-                    <span style={{ margin: "0 10px" }}>To :</span>
-                    <Form.Item>
-                        <DatePicker format="DD/MM/YYYY" value={toDate} onChange={setToDate} style={{ height: 40 }} />
+
+                    <Form.Item
+                        style={{
+                            marginRight: 5,
+                            height: 40,
+                            display: "flex",
+                            alignItems: "center",
+                            fontWeight: 500,
+                        }}
+                    >
+                        From :
                     </Form.Item>
 
-                    <span style={{ margin: "0 10px" }}>Status :</span>
                     <Form.Item>
-                        <Select value={status} onChange={setStatus} style={{ width: 220, height: 40 }}>
-                            <Option value="%">All</Option>
-                            <Option value="WAITING">Waiting Confirm</Option>
-                            <Option value="CONFIRM">RECEIVE</Option>
-                            <Option value="REJECT">REJECT</Option>
-                            <Option value="PAYMENT">PAYMENT</Option>
+                        <DatePicker
+                            format="DD/MM/YYYY"
+                            value={fromDate}
+                            onChange={setFromDate}
+                            style={{ height: 40 }}
+                        />
+                    </Form.Item>
+
+
+                    <Form.Item
+                        style={{
+                            margin: "0 5px",
+                            height: 40,
+                            display: "flex",
+                            alignItems: "center",
+                            fontWeight: 500,
+                        }}
+                    >
+                        To :
+                    </Form.Item>
+
+                    <Form.Item>
+                        <DatePicker
+                            format="DD/MM/YYYY"
+                            value={toDate}
+                            onChange={setToDate}
+                            style={{ height: 40 }}
+                        />
+                    </Form.Item>
+
+
+                    <Form.Item
+                        style={{
+                            margin: "0 5px",
+                            height: 40,
+                            display: "flex",
+                            alignItems: "center",
+                            fontWeight: 500,
+                        }}
+                    >
+                        Status :
+                    </Form.Item>
+
+                    <Form.Item>
+                        <Select
+                            value={status}
+                            onChange={setStatus}
+                            style={{ width: 220, height: 40 }}
+                        >
+                            <Select.Option value="%">All</Select.Option>
+                            {/* <Select.Option value="WAITING">WAITING CONFIRM</Select.Option> */}
+                            <Select.Option value="CONFIRM">CONFIRM</Select.Option>
+                            <Select.Option value="REJECT">REJECT</Select.Option>
+                            <Select.Option value="PAYMENT">PAYMENT</Select.Option>
                         </Select>
                     </Form.Item>
 
+                    {/* Search */}
                     <Form.Item>
-                        <Button type="primary" onClick={onSearchByDate} loading={loading} style={{ height: 40 }}>
+                        <Button
+                            type="primary"
+                            onClick={onSearchByDate}
+                            loading={loading}
+                            style={{ height: 40 }}
+                        >
                             Search
                         </Button>
                     </Form.Item>
 
+                    {/* Export PDF */}
                     <Form.Item>
-                        <Button type="default" onClick={exportPDF} style={{
-                            backgroundColor: "#52c41a",
-                            borderColor: "#52c41a",
-                            height: 38,
-                            color: "white"
-                        }}>
+                        <Button
+                            onClick={exportPDF}
+                            style={{
+                                backgroundColor: "#52c41a",
+                                borderColor: "#52c41a",
+                                height: 40,
+                                color: "white"
+                            }}
+                        >
                             Export PDF
                         </Button>
                     </Form.Item>
+
                 </Form>
             </div>
+
 
             <div style={{ maxHeight: 600 }} className="customTable">
                 <Table
@@ -228,6 +296,15 @@ export default function EBilling_ReportAC() {
                     bordered
                     pagination={false}
                     loading={loading}
+                    rowClassName={(record: MData) => {
+                        const status = record.status?.trim().toLowerCase();
+
+                        if (status === "payment") return "row-payment";
+                        if (status === "confirm") return "row-confirm";
+                        if (status === "waiting") return "row-waiting";
+                        if (status === "reject") return "row-reject";
+                        return "";
+                    }}
                     summary={() => (
                         <Table.Summary fixed="bottom">
                             <Table.Summary.Row style={{ backgroundColor: "#fafafa", fontWeight: 700 }}>

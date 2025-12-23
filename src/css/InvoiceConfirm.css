@@ -15,3 +15,24 @@
     background-color: #eaeaea;
     border-radius: 3px;
 }
+
+
+
+.row-payment td {
+    background-color: #d1fad1 !important;
+}
+
+
+.row-confirm td {
+    background-color: #e6f7ff !important;
+}
+
+
+.row-waiting td {
+    background-color: #f7fcb6 !important;
+}
+
+
+.row-reject td {
+    background-color: #f8b7bd !important;
+}

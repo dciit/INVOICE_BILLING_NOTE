@@ -1,6 +1,6 @@
-//@ts-nocheck
-import React, { useEffect, useState } from "react";
-import { DatePicker, Button, Form, Divider, Table, Select } from "antd";
+
+import React, { use, useEffect, useState } from "react";
+import { DatePicker, Button, Form, Divider, Table, Select, Tag } from "antd";
 import { FormOutlined } from "@ant-design/icons";
 import type { Dayjs } from "dayjs";
 import service from "../../service/confirm.service";
@@ -33,7 +33,7 @@ export type MData = {
 
 export default function EBilling_confirmForAC() {
     const auth = useSelector((state: any) => state.reducer.authen);
-    const [fromDate, setFromDate] = useState<Dayjs | null>(dayjs());
+    const [fromDate, setFromDate] = useState<Dayjs | null>(dayjs().startOf("month"));
     const [toDate, setToDate] = useState<Dayjs | null>(dayjs());
     const [selectedKeys, setSelectedKeys] = useState<React.Key[]>([]);
     const [dataSource, setDataSource] = useState<MData[]>([]);
@@ -41,20 +41,34 @@ export default function EBilling_confirmForAC() {
     const [InvoiceNo, setInvoiceNo] = useState("");
     const visibleData = dataSource;
     const [vendor, setVendor] = useState<string>("%");
+    const [vendorList, setVendorList] = useState<any[]>([]);
     const [status, setStatus] = useState<string>("WAITING");
 
     useEffect(() => {
         fetchData();
     }, [auth.username]);
 
+
+    useEffect(() => {
+        service.getVendor().then((res) => {
+            try {
+                setVendorList(res.data);
+            } catch (error) {
+                console.error(error);
+            }
+        });
+    }, []);
+
+
+
     const fetchData = async () => {
         try {
             setLoading(true);
             const res = await service.PostReportInvoiceByAC({
-                venderCode: "%",
-                invoiceNo: "%",
-                invoiceDateFrom: "",
-                invoiceDateTo: "",
+                venderCode: vendor || "%",
+                invoiceNo: InvoiceNo || "%",
+                invoiceDateFrom: fromDate.format("YYYYMMDD"),
+                invoiceDateTo: toDate.format("YYYYMMDD"),
                 status: status,
             });
 
@@ -188,8 +202,29 @@ export default function EBilling_confirmForAC() {
                 return <div style={{ textAlign: "right" }}>{total.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>;
             },
         },
-        { title: "STATUS", dataIndex: "status", width: 100, align: "center" },
+        {
+            title: "STATUS",
+            dataIndex: "status",
+            width: 100,
+            align: "center",
+            render: (value: string) => {
+                if (!value) return "-";
+
+                const status = value.trim().toLowerCase();
+
+                if (status === "payment") {
+                    return <Tag color="green">Payment</Tag>;
+                }
+
+                if (status === "confirm") {
+                    return <Tag color="blue">Confirm</Tag>;
+                }
+
+                return <Tag>{value}</Tag>;
+            },
+        },
     ];
+
 
     const getGrandTotal = () => {
         const total = visibleData.reduce((sum, item) => sum + (Number(item.amtb ?? 0) + Number(item.vat ?? 0) - calcWhTax(item)), 0);
@@ -212,6 +247,7 @@ export default function EBilling_confirmForAC() {
                     <Form.Item>
                         <DatePicker placeholder="From" format="DD/MM/YYYY" value={fromDate} onChange={setFromDate} style={{ height: 40 }} />
                     </Form.Item>
+
                     <span style={{ margin: "0 10px", fontWeight: 500, fontSize: 16 }}>To :</span>
                     <Form.Item>
                         <DatePicker placeholder="To" format="DD/MM/YYYY" value={toDate} onChange={setToDate} style={{ height: 40 }} />
@@ -219,12 +255,22 @@ export default function EBilling_confirmForAC() {
 
                     <span style={{ margin: "0 10px", fontWeight: 500, fontSize: 16 }}>Select Vendor :</span>
                     <Form.Item>
-                        <Select value={vendor} onChange={setVendor} allowClear style={{ width: 220, height: 40 }}>
-                            <Option value="%">All</Option>
-                            <Option value="V001">Vendor A</Option>
-                            <Option value="V002">Vendor B</Option>
+                        <Select
+                            value={vendor}
+                            onChange={setVendor}
+                            style={{ width: 400, height: 40 }}
+                        >
+                            <Select.Option value="%">All</Select.Option>
+
+                            {vendorList.map((item, index) => (
+                                <Select.Option key={index} value={item.vender.trim()}>
+                                    {item.vdname}
+                                </Select.Option>
+                            ))}
                         </Select>
                     </Form.Item>
+
+
 
                     <span style={{ margin: "0 10px", fontWeight: 500, fontSize: 16 }}>Invoice No :</span>
                     <Form.Item>
@@ -235,7 +281,7 @@ export default function EBilling_confirmForAC() {
                     <Form.Item>
                         <Select value={status} onChange={setStatus} style={{ width: 220, height: 40 }}>
                             <Option value="%">All</Option>
-                            <Option value="WAITING">Waiting Confirm</Option>
+                            <Option value="WAITING">WAITING CONFIRM</Option>
                             <Option value="CONFIRM">CONFIRM</Option>
                             <Option value="REJECT">REJECT</Option>
                             <Option value="PAYMENT">PAYMENT</Option>
@@ -260,6 +306,15 @@ export default function EBilling_confirmForAC() {
                     bordered
                     pagination={false}
                     loading={{ spinning: loading, tip: "Loading...", size: "large" }}
+                    rowClassName={(record: MData) => {
+                        const status = record.status?.trim().toLowerCase();
+
+                        if (status === "payment") return "row-payment";
+                        if (status === "confirm") return "row-confirm";
+                        if (status === "waiting") return "row-waiting";
+                        if (status === "reject") return "row-reject";
+                        return "";
+                    }}
                     summary={() => (
                         <Table.Summary fixed="bottom">
                             <Table.Summary.Row style={{ backgroundColor: "#fafafa", fontWeight: 700 }}>
