@@ -1,7 +1,7 @@
-//@ts-nocheck
+
 import React, { useEffect, useState } from "react";
 import { DatePicker, Button, Form, Divider, Table, Select } from "antd";
-import { FileProtectOutlined, PrinterOutlined, SearchOutlined } from "@ant-design/icons";
+import { FileProtectOutlined, PrinterOutlined, SearchOutlined, LinkOutlined, DeleteOutlined } from "@ant-design/icons";
 import type { Dayjs } from "dayjs";
 import service from "../../service/confirm.service";
 import { useSelector } from "react-redux";
@@ -9,8 +9,9 @@ import "../../css/InvoiceConfirm.css";
 import Swal from "sweetalert2";
 import dayjs from "dayjs";
 import isBetween from "dayjs/plugin/isBetween";
-import EBilling_DetailModalVendor from "../modal/EBilling_DetailModalVendor";
-import EBilling_DetailModalVendorPrint from "../modal/EBilling_DetailModalVendorPrint";
+import EBilling_DetailModalVendor from "./EBilling_DetailModalVendor";
+import EBilling_DetailModalVendorPrint from "./EBilling_DetailModalVendorPrint";
+import EBilling_AttachFileModal from "./EBilling_AttachFileModal";
 
 dayjs.extend(isBetween);
 
@@ -42,12 +43,15 @@ export default function EBilling_ReportVendor() {
     const auth = useSelector((state: any) => state.reducer.authen);
     const [fromDate, setFromDate] = useState<Dayjs | null>(dayjs().startOf("month"));
     const [toDate, setToDate] = useState<Dayjs | null>(dayjs());
-    const [status, setStatus] = useState<string>("WAITING");
+    const [status, setStatus] = useState<string>("%");
     const [dataSource, setDataSource] = useState<InvoiceDetail[]>([]);
     const [loading, setLoading] = useState(false);
     const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
     const [isDetailModalOpenPrint, setIsDetailModalOpenPrint] = useState(false);
+    const [isAttachFileModalOpen, setIsAttachFileModalOpen] = useState(false);
     const [detailRecord, setDetailRecord] = useState<InvoiceDetail | null>(null);
+    const [documentNo, setDocumentNo] = useState("");
+
 
     useEffect(() => {
         fetchData();
@@ -56,13 +60,13 @@ export default function EBilling_ReportVendor() {
     const fetchData = async () => {
         try {
             setLoading(true);
-            const res = await service.PostReportACAndVendorHeader({
+            const res = await service.PostReportVendorHeader({
                 venderCode: auth.username, status: "WAITING", role: auth.role, invoiceDateFrom: fromDate.format("YYYY-MM-DD"),
-                invoiceDateTo: toDate.format("YYYY-MM-DD")
+                invoiceDateTo: toDate.format("YYYY-MM-DD"), documentNo: '%'
             });
             const mappedData = res.data.map((item: any, index: number) => ({ ...item, key: index }));
             setDataSource(mappedData);
-            console.log(res.data)
+
         } catch (error) {
             console.error(error);
         } finally {
@@ -70,7 +74,7 @@ export default function EBilling_ReportVendor() {
         }
     };
 
-    const onSearchByDateAndStatus = async () => {
+    const onSearch = async () => {
         if (!fromDate || !toDate) {
             Swal.fire({ icon: "warning", title: "Please select Document dates." });
             return;
@@ -78,16 +82,19 @@ export default function EBilling_ReportVendor() {
 
         try {
             setLoading(true);
-            const res = await service.PostReportACAndVendorHeader({
+            const res = await service.PostReportVendorHeader({
                 venderCode: auth.username,
                 invoiceDateFrom: fromDate.format("YYYY-MM-DD"),
                 invoiceDateTo: toDate.format("YYYY-MM-DD"),
                 status: status,
-                role: auth.role
+                role: auth.role,
+                documentNo: documentNo ? documentNo : '%'
             });
             const filteredData = res.data
 
             setDataSource(filteredData);
+
+            console.log(filteredData)
         } catch (error) {
             console.error(error);
         } finally {
@@ -95,10 +102,86 @@ export default function EBilling_ReportVendor() {
         }
     };
 
+
+    const deleteDocumentNo = async (record: InvoiceDetail) => {
+        const canDelete =
+            record.status === "WAITING_DCI" || record.status === "REJECT";
+
+        if (!canDelete) {
+            Swal.fire({
+                icon: "warning",
+                title: "ไม่สามารถลบได้",
+                text: "สามารถลบได้เฉพาะสถานะ WAITING_DCI หรือ REJECT เท่านั้น",
+            });
+            return;
+        }
+
+        const result = await Swal.fire({
+            title: "ยืนยันการลบ",
+            text: `คุณต้องการลบเอกสารหมายเลข ${record.documentno} หรือไม่?`,
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "ลบ",
+            cancelButtonText: "ยกเลิก",
+            confirmButtonColor: "#d33",
+        });
+
+        if (!result.isConfirmed) return;
+
+        try {
+            const res = await service.PostDeleteDocumentNo({
+                documentNo: record.documentno,
+            });
+
+            if (res.status === 200) {
+                await Swal.fire({
+                    icon: "success",
+                    title: "ลบสำเร็จ",
+                    text: res.data.message,
+                    timer: 2000,
+                    showConfirmButton: false,
+                });
+
+                onSearch(); // 🔁 refresh table
+            } else {
+                Swal.fire({
+                    icon: "error",
+                    title: "ลบไม่สำเร็จ",
+                    text: "ไม่สามารถลบเอกสารได้",
+                });
+            }
+        } catch (error: any) {
+            console.error(error);
+
+            Swal.fire({
+                icon: "error",
+                title: "เกิดข้อผิดพลาด",
+                text:
+                    error?.response?.data?.message ||
+                    "เกิดข้อผิดพลาดในการลบไฟล์",
+            });
+        }
+    };
+
+
+
+
+
     const columns = [
         { title: "No", width: 60, align: "center", render: (_: any, __: any, index: number) => index + 1 },
-        { title: "DUE DATE", dataIndex: "duedate", width: 120, align: "center" },
+        { title: "DOCUMENT NO", dataIndex: "documentno", width: 120, align: "center" },
+        // { title: "INVOICE NO", dataIndex: "invoiceno", width: 120, align: "center" },
+        // { title: "INVOICE DATE", dataIndex: "invoicedate", width: 120, align: "center" },
+        // {
+        //     title: "DUE DATE",
+        //     dataIndex: "duedate",
+        //     width: 120,
+        //     align: "center",
+        //     render: (_: any, record: InvoiceDetail) =>
+        //         record.duedate ? record.duedate : null
+        // },
         { title: "TAX ID", dataIndex: "taxid", width: 150, align: "center" },
+        { title: "VENDOR CODE", dataIndex: "vendorcode", width: 150, align: "center" },
         { title: "VENDOR NAME", dataIndex: "vendorname", width: 260, align: "left" },
         { title: "PAYMENT TERMS", dataIndex: "paymenT_TERMS", width: 120, align: "center" },
         {
@@ -122,9 +205,24 @@ export default function EBilling_ReportVendor() {
             align: "right",
             render: (val: any) => Number(val).toLocaleString("en-US", { minimumFractionDigits: 2 }),
         },
-        { title: "STATUS", dataIndex: "status", width: 100, align: "center" },
         {
-            title: "Detail",
+            title: "STATUS",
+            dataIndex: "status",
+            width: 110,
+            align: "center",
+            render: (value: string) => {
+                if (!value) return "-";
+
+                if (value === "WAITING_VENDOR") return "Waiting Vendor Confirm";
+                if (value === "WAITING_DCI") return "Waiting DCI Confirm";
+
+
+
+                return value; // อื่น ๆ แสดงตามเดิม
+            },
+        },
+        {
+            title: "DETAIL",
             width: 80,
             align: "center",
             render: (_: any, record: InvoiceDetail) => (
@@ -138,7 +236,7 @@ export default function EBilling_ReportVendor() {
             )
         },
         {
-            title: "Print",
+            title: "PRINT",
             width: 80,
             align: "center",
             render: (_: any, record: InvoiceDetail) => (
@@ -150,8 +248,51 @@ export default function EBilling_ReportVendor() {
                     }}
                 />
             )
+        },
+        {
+            title: "ATTACH FILE",
+            width: 50,
+            align: "center",
+            render: (_: any, record: InvoiceDetail) => (
+                <LinkOutlined
+                    style={{ fontSize: 18, color: "#1890ff", cursor: "pointer" }}
+                    onClick={() => {
+                        setDetailRecord(dataSource);
+                        setIsAttachFileModalOpen(true);
+                    }}
+                />
+            )
+        },
+        {
+            title: "DELETE",
+            width: 50,
+            align: "center",
+            render: (_: any, record: InvoiceDetail) => {
+                const canDelete =
+                    record.status === "WAITING_DCI" || record.status === "REJECT";
+
+                return (
+                    <DeleteOutlined
+                        style={{
+                            fontSize: 25,
+                            color: canDelete ? "#ff0000" : "#ccc",
+                            cursor: canDelete ? "pointer" : "not-allowed",
+                            transition: "transform 0.2s, color 0.2s"
+                        }}
+                        onMouseEnter={e => {
+                            if (canDelete) e.currentTarget.style.color = "#cc0000";
+                        }}
+                        onMouseLeave={e => {
+                            if (canDelete) e.currentTarget.style.color = "#ff0000";
+                        }}
+                        onClick={() => deleteDocumentNo(record)}
+                    />
+                );
+            }
         }
+
     ];
+
 
     const getGrandTotalAmount = () => dataSource.reduce((sum, item) => sum + Number(item.totaL_AMOUNT ?? 0), 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     const getGrandTotalWHTax = () => dataSource.reduce((sum, item) => sum + Number(item.whtax ?? 0), 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -162,7 +303,7 @@ export default function EBilling_ReportVendor() {
             <div style={{ display: "flex", alignItems: "center" }}>
                 <FileProtectOutlined style={{ fontSize: 28, marginRight: 10, color: "#1890ff" }} />
                 <p style={{ fontWeight: 600, fontSize: 20, margin: 0 }}>
-                    {auth?.role === "rol_accountant" ? "E-Billing" : "E-Billing"}
+                    Report
                 </p>
             </div>
 
@@ -172,13 +313,13 @@ export default function EBilling_ReportVendor() {
                 <Form layout="inline" style={{ alignItems: "center" }}>
 
                     <Form.Item
-                        style={{ marginRight: 10, fontSize: 16, fontWeight: 500, height: 40, display: "flex", alignItems: "center" }}
+                        style={{ marginRight: 10, fontSize: 14, fontWeight: 500, height: 32, display: "flex", alignItems: "center" }}
                     >
                         Invoice Date
                     </Form.Item>
 
                     <Form.Item
-                        style={{ marginRight: 5, height: 40, display: "flex", fontWeight: 500, alignItems: "center" }}
+                        style={{ marginRight: 5, height: 32, display: "flex", fontWeight: 500, alignItems: "center" }}
                     >
                         From :
                     </Form.Item>
@@ -188,12 +329,12 @@ export default function EBilling_ReportVendor() {
                             format="DD/MM/YYYY"
                             value={fromDate}
                             onChange={setFromDate}
-                            style={{ height: 40 }}
+                            style={{ height: 32, width: 150 }}
                         />
                     </Form.Item>
 
                     <Form.Item
-                        style={{ margin: "0 5px", height: 40, display: "flex", fontWeight: 500, alignItems: "center" }}
+                        style={{ margin: "0 5px", height: 32, display: "flex", fontWeight: 500, alignItems: "center" }}
                     >
                         To :
                     </Form.Item>
@@ -203,36 +344,43 @@ export default function EBilling_ReportVendor() {
                             format="DD/MM/YYYY"
                             value={toDate}
                             onChange={setToDate}
-                            style={{ height: 40 }}
+                            style={{ height: 32, width: 150 }}
                         />
                     </Form.Item>
 
                     <Form.Item
-                        style={{ margin: "0 5px", height: 40, display: "flex", fontWeight: 500, alignItems: "center" }}
+                        style={{ margin: "0 5px", height: 32, display: "flex", fontWeight: 500, alignItems: "center" }}
                     >
                         Status :
                     </Form.Item>
 
                     <Form.Item>
-                        <Select
-                            value={status}
-                            onChange={setStatus}
-                            style={{ width: 180, height: 40 }}
-                        >
-                            <Select.Option value="%">All</Select.Option>
-                            <Select.Option value="WAITING">WAITING CONFIRM</Select.Option>
-                            <Select.Option value="CONFIRM">CONFIRM</Select.Option>
-                            <Select.Option value="REJECT">REJECT</Select.Option>
-                            <Select.Option value="PAYMENT">PAYMENT</Select.Option>
+                        <Select value={status} onChange={setStatus} style={{ width: 200, height: 32 }}>
+                            <Option value="%">All</Option>
+                            <Option value="WAITING_VENDOR">Waiting Vendor Confirm</Option>
+                            <Option value="WAITING_DCI">Waiting DCI Confirm</Option>
+                            <Option value="CONFIRM">Confirm</Option>
+                            <Option value="REJECT">Reject</Option>
+                            <Option value="PAYMENT">Payment</Option>
                         </Select>
+                    </Form.Item>
+
+                    <span style={{ margin: "0 10px", fontWeight: 500, fontSize: 14 }}>Document No :</span>
+                    <Form.Item>
+                        <input
+                            type="text"
+                            value={documentNo}
+                            onChange={(e) => setDocumentNo(e.target.value)}
+                            style={{ width: 250, height: 32, padding: "0 10px", borderRadius: 4, border: "1px solid #d9d9d9" }}
+                        />
                     </Form.Item>
 
                     <Form.Item>
                         <Button
                             type="primary"
-                            onClick={onSearchByDateAndStatus}
+                            onClick={onSearch}
                             loading={loading}
-                            style={{ height: 40 }}
+                            style={{ height: 32 }}
                         >
                             Search
                         </Button>
@@ -264,10 +412,12 @@ export default function EBilling_ReportVendor() {
                     summary={() => (
                         <Table.Summary fixed="bottom">
                             <Table.Summary.Row style={{ backgroundColor: "#fafafa", fontWeight: 700 }}>
-                                <Table.Summary.Cell colSpan={5} align="center">Grand Total</Table.Summary.Cell>
+                                <Table.Summary.Cell colSpan={6} align="center">Grand Total</Table.Summary.Cell>
                                 <Table.Summary.Cell align="right">{getGrandTotalAmount()}</Table.Summary.Cell>
                                 <Table.Summary.Cell align="right">{getGrandTotalWHTax()}</Table.Summary.Cell>
                                 <Table.Summary.Cell align="right">{getGrandTotalNetPaid()}</Table.Summary.Cell>
+                                <Table.Summary.Cell></Table.Summary.Cell>
+                                <Table.Summary.Cell></Table.Summary.Cell>
                                 <Table.Summary.Cell></Table.Summary.Cell>
                                 <Table.Summary.Cell></Table.Summary.Cell>
                                 <Table.Summary.Cell></Table.Summary.Cell>
@@ -281,14 +431,22 @@ export default function EBilling_ReportVendor() {
                 open={isDetailModalOpen}
                 onClose={() => setIsDetailModalOpen(false)}
                 invoiceDetail={detailRecord}
-                refreshData={onSearchByDateAndStatus}
+                refreshData={onSearch}
             />
 
             <EBilling_DetailModalVendorPrint
                 open={isDetailModalOpenPrint}
                 onClose={() => setIsDetailModalOpenPrint(false)}
                 invoiceDetail={detailRecord}
-                refreshData={onSearchByDateAndStatus}
+                refreshData={onSearch}
+            />
+
+
+            <EBilling_AttachFileModal
+                open={isAttachFileModalOpen}
+                onClose={() => setIsAttachFileModalOpen(false)}
+                invoiceDetail={detailRecord}
+                refreshData={onSearch}
             />
         </div>
     );

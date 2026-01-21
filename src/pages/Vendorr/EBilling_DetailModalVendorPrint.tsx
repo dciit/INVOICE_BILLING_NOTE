@@ -77,8 +77,7 @@ const EBilling_DetailModalVendorPrint: React.FC<EBilling_DetailModalVendorPrintP
             if (!invoiceDetail) return;
 
             const res = await service.PostReportVendorDetailPrint({
-                venderCode: invoiceDetail[0]?.vendorcode,
-                status: invoiceDetail[0]?.status,
+                documentNo: invoiceDetail[0]?.documentno,
             });
 
             const mapped = (res.data || []).map((item: any, index: number) => ({

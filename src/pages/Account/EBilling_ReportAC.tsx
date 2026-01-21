@@ -1,7 +1,7 @@
 //@ts-nocheck
 import React, { useEffect, useState } from "react";
-import { DatePicker, Button, Form, Divider, Table, Select } from "antd";
-import { FileProtectOutlined, SearchOutlined, DollarOutlined } from "@ant-design/icons";
+import { DatePicker, Button, Form, Divider, Table, Select, Checkbox, Tag } from "antd";
+import { FileProtectOutlined, SearchOutlined, LikeOutlined } from "@ant-design/icons";
 import type { Dayjs } from "dayjs";
 import service from "../../service/confirm.service";
 import { useSelector } from "react-redux";
@@ -9,8 +9,8 @@ import "../../css/InvoiceConfirm.css";
 import Swal from "sweetalert2";
 import dayjs from "dayjs";
 import isBetween from "dayjs/plugin/isBetween";
-import EBilling_DetailModalAC from "../modal/EBilling_DetailModalAC";
-import EBilling_DetailModalACPrint from "../modal/EBilling_DetailModalACPrint";
+import EBilling_DetailModalAC from "./EBilling_DetailModalAC";
+import EBilling_DetailModalACPrint from "./EBilling_DetailModalACPrint";
 
 
 dayjs.extend(isBetween);
@@ -51,17 +51,31 @@ export default function EBilling_ReportAC() {
     const [isDetailModalOpenPrint, setIsDetailModalOpenPrint] = useState(false);
     const [detailRecordDetail, setDetailRecordDetail] = useState<InvoiceDetail | null>(null);
     const [detailRecordPrint, setDetailRecordPrint] = useState<InvoiceDetail | null>(null);
-    const [status, setStatus] = useState<string>("CONFIRM");
+    const [status, setStatus] = useState<string>("%");
+    const [vendor, setVendor] = useState<string>("%");
+    const [vendorList, setVendorList] = useState<any[]>([]);
+    const [ACType, setACType] = useState<string>("%");
+
 
     useEffect(() => {
         fetchData();
     }, [auth.username]);
 
+    useEffect(() => {
+        service.getVendor().then((res) => {
+            try {
+                setVendorList(res.data);
+            } catch (error) {
+                console.error(error);
+            }
+        });
+    }, []);
+
     const fetchData = async () => {
         try {
             setLoading(true);
             const res = await service.PostReportACHeader({
-                status: "CONFIRM", role: auth.role, invoiceDateFrom: fromDate.format("YYYY-MM-DD"),
+                status: "%", role: auth.role, invoiceDateFrom: fromDate.format("YYYY-MM-DD"),
                 invoiceDateTo: toDate.format("YYYY-MM-DD"),
             });
             const mappedData = res.data.map((item: any, index: number) => ({ ...item, key: index }));
@@ -74,7 +88,7 @@ export default function EBilling_ReportAC() {
         }
     };
 
-    const onSearchByDate = async () => {
+    const onSearch = async () => {
         if (!fromDate || !toDate) {
             Swal.fire({ icon: "warning", title: "Please select Document dates." });
             return;
@@ -104,9 +118,16 @@ export default function EBilling_ReportAC() {
     const columns = [
         { title: "No", width: 60, align: "center", render: (_: any, __: any, index: number) => index + 1 },
         { title: "DUE DATE", dataIndex: "duedate", width: 120, align: "center" },
-        { title: "TAX ID", dataIndex: "taxid", width: 150, align: "center" },
-        { title: "VENDOR NAME", dataIndex: "vendorname", width: 260, align: "left" },
-        { title: "PAYMENT TERMS", dataIndex: "paymenT_TERMS", width: 120, align: "center" },
+        { title: "TAX ID", dataIndex: "taxid", width: 200, align: "center" },
+        { title: "VENDOR CODE", dataIndex: "vendorcode", width: 150, align: "center" },
+        {
+            title: "VENDER NAME",
+            dataIndex: "vendorname",
+            width: 400,
+            align: "center",
+            render: (value: any) => <div style={{ textAlign: "left" }}>{value}</div>,
+        },
+        { title: "PAYMENT TERMS", dataIndex: "paymenT_TERMS", width: 200, align: "center" },
         {
             title: "TOTAL AMOUNT",
             dataIndex: "totaL_AMOUNT",
@@ -128,9 +149,39 @@ export default function EBilling_ReportAC() {
             align: "right",
             render: (val: any) => Number(val).toLocaleString("en-US", { minimumFractionDigits: 2 }),
         },
-        { title: "STATUS", dataIndex: "status", width: 100, align: "center" },
         {
-            title: "Detail",
+            title: "STATUS",
+            dataIndex: "status",
+            width: 150,
+            align: "center",
+            fixed: "right", // ติดขวา
+            render: (value: string) => {
+                if (!value) return "-";
+
+                const raw = value.trim();
+                const status = raw.toLowerCase();
+
+                if (status === "payment") {
+                    return <Tag color="green">Payment</Tag>;
+                }
+
+                if (status === "confirm") {
+                    return <Tag color="blue">Confirm</Tag>;
+                }
+
+                if (raw.toUpperCase() === "WAITING_VENDOR") {
+                    return <Tag color="orange">Waiting Vendor Confirm</Tag>;
+                }
+
+                if (raw.toUpperCase() === "WAITING_DCI") {
+                    return <Tag color="gold">Waiting DCI Confirm</Tag>;
+                }
+
+                return <Tag>{value}</Tag>; // อื่นๆ แสดงตามเดิม
+            },
+        },
+        {
+            title: "DETAIL",
             width: 80,
             align: "center",
             render: (_: any, record: InvoiceDetail) => (
@@ -171,8 +222,8 @@ export default function EBilling_ReportAC() {
     return (
         <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
             <div style={{ display: "flex", alignItems: "center" }}>
-                <DollarOutlined style={{ fontSize: 28, marginRight: 10, color: "#1890ff" }} />
-                <p style={{ fontWeight: 600, fontSize: 20 }}>Payment</p>
+                <LikeOutlined style={{ fontSize: 28, marginRight: 10, color: "#1890ff" }} />
+                <p style={{ fontWeight: 600, fontSize: 20 }}>Report</p>
             </div>
 
             <Divider style={{ borderColor: "#d0cdcd", marginTop: 8 }} />
@@ -202,7 +253,7 @@ export default function EBilling_ReportAC() {
                             format="DD/MM/YYYY"
                             value={fromDate}
                             onChange={setFromDate}
-                            style={{ height: 40 }}
+                            style={{ height: 32 }}
                         />
                     </Form.Item>
 
@@ -210,7 +261,7 @@ export default function EBilling_ReportAC() {
                     <Form.Item
                         style={{
                             margin: "0 5px",
-                            height: 40,
+                            height: 32,
                             display: "flex",
                             alignItems: "center",
                             fontWeight: 500,
@@ -224,15 +275,46 @@ export default function EBilling_ReportAC() {
                             format="DD/MM/YYYY"
                             value={toDate}
                             onChange={setToDate}
-                            style={{ height: 40 }}
+                            style={{ height: 32 }}
                         />
+                    </Form.Item>
+
+                    <span style={{ margin: "0 3px", fontWeight: 500, fontSize: 14 }}>Select Vendor :</span>
+                    <Form.Item>
+                        <Select
+                            showSearch
+                            value={vendor}
+                            onChange={setVendor}
+                            style={{ width: 350, height: 32 }}
+                            placeholder="เลือก Vendor"
+                            optionFilterProp="children"
+                            filterOption={(input, option) => option.children.toLowerCase().includes(input.toLowerCase())}
+                        >
+                            <Select.Option value="%">All</Select.Option>
+
+                            {vendorList.map((item, index) => (
+                                <Select.Option key={index} value={item.vender.trim()}>
+                                    {item.vdname}
+                                </Select.Option>
+                            ))}
+                        </Select>
+                    </Form.Item>
+
+                    <span style={{ margin: "0 3px", fontWeight: 500, fontSize: 14 }}>AC Type :</span>
+                    <Form.Item>
+                        <Select value={ACType} onChange={setACType} style={{ width: 200, height: 32 }}>
+                            <Option value="%">ALL</Option>
+                            <Option value="G">G : GENERAL PURCHASE</Option>
+                            <Option value="O">O : OTHERS</Option>
+                            <Option value="R">R : RAW MATERIAL</Option>
+                        </Select>
                     </Form.Item>
 
 
                     <Form.Item
                         style={{
                             margin: "0 5px",
-                            height: 40,
+                            height: 32,
                             display: "flex",
                             alignItems: "center",
                             fontWeight: 500,
@@ -242,16 +324,13 @@ export default function EBilling_ReportAC() {
                     </Form.Item>
 
                     <Form.Item>
-                        <Select
-                            value={status}
-                            onChange={setStatus}
-                            style={{ width: 220, height: 40 }}
-                        >
-                            <Select.Option value="%">All</Select.Option>
-                            {/* <Select.Option value="WAITING">WAITING CONFIRM</Select.Option> */}
-                            <Select.Option value="CONFIRM">CONFIRM</Select.Option>
-                            <Select.Option value="REJECT">REJECT</Select.Option>
-                            <Select.Option value="PAYMENT">PAYMENT</Select.Option>
+                        <Select value={status} onChange={setStatus} style={{ width: 200, height: 32 }}>
+                            <Option value="%">All</Option>
+                            <Option value="WAITING_VENDOR">Waiting Vendor Confirm</Option>
+                            <Option value="WAITING_DCI">Waiting DCI Confirm</Option>
+                            <Option value="CONFIRM">Confirm</Option>
+                            <Option value="REJECT">Reject</Option>
+                            <Option value="PAYMENT">Payment</Option>
                         </Select>
                     </Form.Item>
 
@@ -259,9 +338,9 @@ export default function EBilling_ReportAC() {
                     <Form.Item>
                         <Button
                             type="primary"
-                            onClick={onSearchByDate}
+                            onClick={onSearch}
                             loading={loading}
-                            style={{ height: 40 }}
+                            style={{ height: 32 }}
                         >
                             Search
                         </Button>
@@ -274,7 +353,7 @@ export default function EBilling_ReportAC() {
                             style={{
                                 backgroundColor: "#52c41a",
                                 borderColor: "#52c41a",
-                                height: 40,
+                                height: 32,
                                 color: "white"
                             }}
                         >
@@ -315,6 +394,7 @@ export default function EBilling_ReportAC() {
                                 <Table.Summary.Cell ></Table.Summary.Cell>
                                 <Table.Summary.Cell ></Table.Summary.Cell>
                                 <Table.Summary.Cell ></Table.Summary.Cell>
+                                <Table.Summary.Cell ></Table.Summary.Cell>
                             </Table.Summary.Row>
                         </Table.Summary>
                     )}
@@ -325,7 +405,7 @@ export default function EBilling_ReportAC() {
                 open={isDetailModalOpenDetail}
                 onClose={() => setIsDetailModalOpenDetail(false)}
                 invoiceDetail={detailRecordDetail}
-                refreshData={onSearchByDate}
+                refreshData={onSearch}
             />
 
 

@@ -32,9 +32,9 @@ function LoginPage() {
     useEffect(() => {
         if (auth.login === true) {
             if (auth.role === "rol_accountant") {
-                navigate(`/Invoices`);
+                navigate(`/DashboardAC`);
             } else {
-                navigate(`/Invoice`);
+                navigate(`/DashboardVendor`);
             }
         }
     }, [auth.login]);

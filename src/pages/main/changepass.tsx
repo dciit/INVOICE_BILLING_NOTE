@@ -46,8 +46,8 @@ function ChangePass() {
 
     const handleChangepass = async () => {
         if (
-            !formpass.oldPassword || 
-            !formpass.newPassword || 
+            !formpass.oldPassword ||
+            !formpass.newPassword ||
             !formpass.confirmPassword
         ) {
             Swal.fire({
@@ -111,25 +111,6 @@ function ChangePass() {
                 <div className="flex flex-row gap-5">
                     <div className="border border-gray-400 rounded-lg w-[600px] p-3">
                         <form action="changepass" className="max-w-full">
-                            <div className="mt-4">
-                                <div className="flex flex-col md:flex-row gap-2">
-                                    <label
-                                        htmlFor="oldpass"
-                                        className="text-sm p-2 border border-black rounded-md bg-[#FFF5D7] font-normal text-black flex items-center gap-2 w-[17rem]"
-                                    >
-                                        <LockOutlined /> OLD PASSWORD
-                                    </label>
-                                    <Input
-                                        type="password"
-                                        id="oldpass"
-                                        placeholder="*******"
-                                        className="w-full text-sm p-2"
-                                        value={formpass.oldPassword}
-                                        onChange={(e) => setFormPass({ ...formpass, oldPassword: e.target.value })}
-                                    />
-                                </div>
-                            </div>
-                            {/* new pass */}
                             <div>
                                 <div className="flex flex-col md:flex-row gap-2">
                                     <label

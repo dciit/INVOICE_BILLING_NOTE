@@ -1,5 +1,5 @@
 
-import React, { use, useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { DatePicker, Button, Form, Divider, Table, Select, Tag } from "antd";
 import { FormOutlined } from "@ant-design/icons";
 import type { Dayjs } from "dayjs";
@@ -9,6 +9,7 @@ import "../../css/InvoiceConfirm.css";
 import Swal from "sweetalert2";
 import dayjs from "dayjs";
 import isBetween from "dayjs/plugin/isBetween";
+import { color } from "framer-motion";
 dayjs.extend(isBetween);
 
 const { Option } = Select;
@@ -31,7 +32,7 @@ export type MData = {
     vatIn?: string;
 };
 
-export default function EBilling_confirmForAC() {
+export default function EBilling_SummaryAC() {
     const auth = useSelector((state: any) => state.reducer.authen);
     const [fromDate, setFromDate] = useState<Dayjs | null>(dayjs().startOf("month"));
     const [toDate, setToDate] = useState<Dayjs | null>(dayjs());
@@ -42,10 +43,12 @@ export default function EBilling_confirmForAC() {
     const visibleData = dataSource;
     const [vendor, setVendor] = useState<string>("%");
     const [vendorList, setVendorList] = useState<any[]>([]);
-    const [status, setStatus] = useState<string>("WAITING");
+    const [status, setStatus] = useState<string>("%");
+    const [ACType, setACType] = useState<string>("%");
+
 
     useEffect(() => {
-        fetchData();
+       // fetchData();
     }, [auth.username]);
 
 
@@ -70,6 +73,7 @@ export default function EBilling_confirmForAC() {
                 invoiceDateFrom: fromDate.format("YYYYMMDD"),
                 invoiceDateTo: toDate.format("YYYYMMDD"),
                 status: status,
+                actype: ACType
             });
 
             const mappedData = res.data.map((item: any, index: number) => ({
@@ -87,6 +91,8 @@ export default function EBilling_confirmForAC() {
                 whTaxRate: item.whtax,
                 totalAmount: item.totaL_AMOUNT,
             }));
+
+
 
             setDataSource(mappedData);
         } catch (error) {
@@ -113,6 +119,7 @@ export default function EBilling_confirmForAC() {
                 invoiceDateFrom: fromDate.format("YYYYMMDD"),
                 invoiceDateTo: toDate.format("YYYYMMDD"),
                 status: status,
+                actype: ACType
             });
 
 
@@ -125,13 +132,16 @@ export default function EBilling_confirmForAC() {
                 invoiceDate: item.invoicedate,
                 invoiceNo: item.invoiceno,
                 paymentTerms: item.paymenT_TERMS,
+                vendorcode: item.vendorcode,
                 vendorName: item.vendorname,
                 status: item.status,
                 vat: item.totalvat,
                 whTaxRate: item.whtax,
                 totalAmount: item.totaL_AMOUNT,
+                actype: item.actype
             }));
 
+            console.log("AAA", res.data)
             setDataSource(filtered);
         } catch (error) {
             console.error(error);
@@ -153,25 +163,117 @@ export default function EBilling_confirmForAC() {
     };
 
     const columns = [
-        { title: "No", dataIndex: "no", width: 60, align: "center" },
-        { title: "INVOICE NO", dataIndex: "invoiceNo", width: 180, align: "center" },
-        { title: "INVOICE DATE", dataIndex: "invoiceDate", width: 120, align: "center" },
+        {
+            title: "NO",
+            dataIndex: "no",
+            width: 60,
+            align: "center",
+            fixed: "left",
+            onHeaderCell: () => ({
+                style: {
+                    backgroundColor: "rgb(167 213 255)",
+                    color: "black",
+                    fontWeight: "bold",
+                },
+            }),
+        },
+        {
+            title: "INVOICE NO", dataIndex: "invoiceNo", width: 180, align: "center", fixed: "left",
+            onHeaderCell: () => ({
+                style: {
+                    backgroundColor: "rgb(167 213 255)",
+                    color: "black",
+                    fontWeight: "bold",
+                },
+            }),
+        },
+        {
+            title: "INVOICE DATE", dataIndex: "invoiceDate", width: 120, align: "center",
+            onHeaderCell: () => ({
+                style: {
+                    backgroundColor: "rgb(167 213 255)",
+                    color: "black",
+                    fontWeight: "bold",
+                },
+            }),
+        },
+        {
+            title: "VENDER CODE", dataIndex: "vendorcode", width: 120, align: "center",
+            onHeaderCell: () => ({
+                style: {
+                    backgroundColor: "rgb(167 213 255)",
+                    color: "black",
+                    fontWeight: "bold",
+                },
+            }),
+        },
         {
             title: "VENDER NAME",
             dataIndex: "vendorName",
             width: 250,
             align: "center",
             render: (value: any) => <div style={{ textAlign: "left" }}>{value}</div>,
+            onHeaderCell: () => ({
+                style: {
+                    backgroundColor: "rgb(167 213 255)",
+                    color: "black",
+                    fontWeight: "bold",
+                },
+            }),
         },
-        { title: "PAYMENT TERMS", dataIndex: "paymentTerms", width: 150, align: "center" },
-        { title: "DUE DATE", dataIndex: "duedate", width: 120, align: "center" },
-        { title: "CURRENCY", dataIndex: "currency", width: 80, align: "center" },
+        {
+            title: "AC TYPE", dataIndex: "actype", width: 100, align: "center",
+            onHeaderCell: () => ({
+                style: {
+                    backgroundColor: "rgb(167 213 255)",
+                    color: "black",
+                    fontWeight: "bold",
+                },
+            }),
+        },
+        {
+            title: "PAYMENT TERMS", dataIndex: "paymentTerms", width: 150, align: "center",
+            onHeaderCell: () => ({
+                style: {
+                    backgroundColor: "rgb(167 213 255)",
+                    color: "black",
+                    fontWeight: "bold",
+                },
+            }),
+        },
+        {
+            title: "DUE DATE", dataIndex: "duedate", width: 120, align: "center",
+            onHeaderCell: () => ({
+                style: {
+                    backgroundColor: "rgb(167 213 255)",
+                    color: "black",
+                    fontWeight: "bold",
+                },
+            }),
+        },
+        {
+            title: "CURRENCY", dataIndex: "currency", width: 80, align: "center",
+            onHeaderCell: () => ({
+                style: {
+                    backgroundColor: "rgb(167 213 255)",
+                    color: "black",
+                    fontWeight: "bold",
+                },
+            }),
+        },
         {
             title: "AMOUNT (BAHT)",
             dataIndex: "amtb",
             width: 180,
             align: "center",
             render: (value: any) => <div style={{ textAlign: "right" }}>{value ? Number(value).toLocaleString() : "-"}</div>,
+            onHeaderCell: () => ({
+                style: {
+                    backgroundColor: "rgb(167 213 255)",
+                    color: "black",
+                    fontWeight: "bold",
+                },
+            }),
         },
         {
             title: "VAT IN",
@@ -179,8 +281,24 @@ export default function EBilling_confirmForAC() {
             width: 120,
             align: "center",
             render: (value: any) => <div style={{ textAlign: "right" }}>{value ? Number(value).toLocaleString() : "-"}</div>,
+            onHeaderCell: () => ({
+                style: {
+                    backgroundColor: "rgb(167 213 255)",
+                    color: "black",
+                    fontWeight: "bold",
+                },
+            }),
         },
-        { title: "W/H TAX RATE %", dataIndex: "whTaxRate", width: 120, align: "center" },
+        {
+            title: "W/H TAX RATE %", dataIndex: "whTaxRate", width: 120, align: "center",
+            onHeaderCell: () => ({
+                style: {
+                    backgroundColor: "rgb(167 213 255)",
+                    color: "black",
+                    fontWeight: "bold",
+                },
+            }),
+        },
         {
             title: "W/H TAX",
             dataIndex: "whTaxRate",
@@ -191,6 +309,13 @@ export default function EBilling_confirmForAC() {
                     {calcWhTax(record).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
                 </div>
             ),
+            onHeaderCell: () => ({
+                style: {
+                    backgroundColor: "rgb(167 213 255)",
+                    color: "black",
+                    fontWeight: "bold",
+                },
+            }),
         },
         {
             title: "TOTAL AMOUNT",
@@ -201,16 +326,25 @@ export default function EBilling_confirmForAC() {
                 const total = (Number(record.amtb ?? 0) + Number(record.vat ?? 0) - calcWhTax(record));
                 return <div style={{ textAlign: "right" }}>{total.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</div>;
             },
+            onHeaderCell: () => ({
+                style: {
+                    backgroundColor: "rgb(167 213 255)",
+                    color: "black",
+                    fontWeight: "bold",
+                },
+            }),
         },
         {
             title: "STATUS",
             dataIndex: "status",
-            width: 100,
+            width: 150,
             align: "center",
+            fixed: "right", // ติดขวา
             render: (value: string) => {
                 if (!value) return "-";
 
-                const status = value.trim().toLowerCase();
+                const raw = value.trim();
+                const status = raw.toLowerCase();
 
                 if (status === "payment") {
                     return <Tag color="green">Payment</Tag>;
@@ -220,8 +354,23 @@ export default function EBilling_confirmForAC() {
                     return <Tag color="blue">Confirm</Tag>;
                 }
 
-                return <Tag>{value}</Tag>;
+                if (raw.toUpperCase() === "WAITING_VENDOR") {
+                    return <Tag color="orange">Waiting Vendor Confirm</Tag>;
+                }
+
+                if (raw.toUpperCase() === "WAITING_DCI") {
+                    return <Tag color="gold">Waiting DCI Confirm</Tag>;
+                }
+
+                return <Tag>{value}</Tag>; // อื่นๆ แสดงตามเดิม
             },
+            onHeaderCell: () => ({
+                style: {
+                    backgroundColor: "rgb(167 213 255)",
+                    color: "black",
+                    fontWeight: "bold",
+                },
+            }),
         },
     ];
 
@@ -235,30 +384,34 @@ export default function EBilling_confirmForAC() {
         <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
             <div style={{ display: "flex", alignItems: "center" }}>
                 <FormOutlined style={{ fontSize: 28, marginRight: 10, color: "#1890ff" }} />
-                <p style={{ fontWeight: 600, fontSize: 20, margin: 0 }}>Invoice Report</p>
+                <p style={{ fontWeight: 600, fontSize: 20, margin: 0 }}>Summary Billing Report</p>
             </div>
 
             <Divider style={{ borderColor: "#d0cdcd", marginTop: 8 }} />
 
             <div style={{ display: "flex", justifyContent: "center" }}>
                 <Form layout="inline" style={{ alignItems: "center", marginBottom: 20 }}>
-                    <span style={{ marginRight: 10, fontWeight: 500, fontSize: 16 }}>Invoice Date</span>
-                    <span style={{ marginRight: 10, fontWeight: 500, fontSize: 16 }}>From :</span>
+                    <span style={{ marginRight: 3, fontWeight: 500, fontSize: 14 }}>Invoice Date</span>
+                    <span style={{ marginRight: 3, fontWeight: 500, fontSize: 14 }}>From :</span>
                     <Form.Item>
-                        <DatePicker placeholder="From" format="DD/MM/YYYY" value={fromDate} onChange={setFromDate} style={{ height: 40 }} />
+                        <DatePicker placeholder="From" format="DD/MM/YYYY" value={fromDate} onChange={setFromDate} style={{ height: 32, width: 120 }} />
                     </Form.Item>
 
-                    <span style={{ margin: "0 10px", fontWeight: 500, fontSize: 16 }}>To :</span>
+                    <span style={{ margin: "0 3px", fontWeight: 500, fontSize: 14 }}>To :</span>
                     <Form.Item>
-                        <DatePicker placeholder="To" format="DD/MM/YYYY" value={toDate} onChange={setToDate} style={{ height: 40 }} />
+                        <DatePicker placeholder="To" format="DD/MM/YYYY" value={toDate} onChange={setToDate} style={{ height: 32, width: 120 }} />
                     </Form.Item>
 
-                    <span style={{ margin: "0 10px", fontWeight: 500, fontSize: 16 }}>Select Vendor :</span>
+                    <span style={{ margin: "0 3px", fontWeight: 500, fontSize: 14 }}>Select Vendor :</span>
                     <Form.Item>
                         <Select
+                            showSearch
                             value={vendor}
                             onChange={setVendor}
-                            style={{ width: 400, height: 40 }}
+                            style={{ width: 350, height: 32 }}
+                            placeholder="เลือก Vendor"
+                            optionFilterProp="children"
+                            filterOption={(input, option) => option.children.toLowerCase().includes(input.toLowerCase())}
                         >
                             <Select.Option value="%">All</Select.Option>
 
@@ -272,64 +425,85 @@ export default function EBilling_confirmForAC() {
 
 
 
-                    <span style={{ margin: "0 10px", fontWeight: 500, fontSize: 16 }}>Invoice No :</span>
+
+                    <span style={{ margin: "0 3px", fontWeight: 500, fontSize: 14 }}>Invoice No :</span>
                     <Form.Item>
-                        <input type="text" value={InvoiceNo} onChange={(e) => setInvoiceNo(e.target.value)} style={{ width: 250, height: 40, padding: "0 10px", borderRadius: 4, border: "1px solid #d9d9d9" }} />
+                        <input type="text" value={InvoiceNo} onChange={(e) => setInvoiceNo(e.target.value)} style={{ width: 180, height: 32, padding: "0 10px", borderRadius: 4, border: "1px solid #d9d9d9" }} />
                     </Form.Item>
 
-                    <span style={{ margin: "0 10px", fontWeight: 500, fontSize: 16 }}>Status :</span>
+
+                    <span style={{ margin: "0 3px", fontWeight: 500, fontSize: 14 }}>AC Type :</span>
                     <Form.Item>
-                        <Select value={status} onChange={setStatus} style={{ width: 220, height: 40 }}>
+                        <Select value={ACType} onChange={setACType} style={{ width: 200, height: 32 }}>
+                            <Option value="%">ALL</Option>
+                            <Option value="G">G : GENERAL PURCHASE</Option>
+                            <Option value="O">O : OTHERS</Option>
+                            <Option value="R">R : RAW MATERIAL</Option>
+                        </Select>
+                    </Form.Item>
+
+                    <span style={{ margin: "0 3px", fontWeight: 500, fontSize: 14 }}>Status :</span>
+                    <Form.Item>
+                        <Select value={status} onChange={setStatus} style={{ width: 200, height: 32 }}>
                             <Option value="%">All</Option>
-                            <Option value="WAITING">WAITING CONFIRM</Option>
-                            <Option value="CONFIRM">CONFIRM</Option>
-                            <Option value="REJECT">REJECT</Option>
-                            <Option value="PAYMENT">PAYMENT</Option>
+                            <Option value="WAITING_VENDOR">Waiting Vendor Confirm</Option>
+                            <Option value="WAITING_DCI">Waiting DCI Confirm</Option>
+                            <Option value="CONFIRM">Confirm</Option>
+                            <Option value="REJECT">Reject</Option>
+                            <Option value="PAYMENT">Payment</Option>
                         </Select>
                     </Form.Item>
 
                     <Form.Item>
-                        <Button type="primary" onClick={onSearch} loading={loading} style={{ height: 40, borderRadius: 6 }}>
+                        <Button type="primary" onClick={onSearch} loading={loading} style={{ height: 32, borderRadius: 6 }}>
                             Search
                         </Button>
                     </Form.Item>
                 </Form>
             </div>
 
-            <div style={{ maxHeight: 600, overflowY: "auto" }} className="customTable">
+            <div style={{ maxHeight: 700, overflowY: "auto" }} className="customTable">
                 <Table
                     columns={columns}
                     dataSource={visibleData}
-                    scroll={{ x: "max-content", y: 600 }}
+                    scroll={{ x: "max-content" }}
                     tableLayout="fixed"
                     sticky
                     bordered
                     pagination={false}
                     loading={{ spinning: loading, tip: "Loading...", size: "large" }}
                     rowClassName={(record: MData) => {
-                        const status = record.status?.trim().toLowerCase();
+                        const raw = record.status?.trim();
+                        const status = raw?.toLowerCase();
 
                         if (status === "payment") return "row-payment";
                         if (status === "confirm") return "row-confirm";
                         if (status === "waiting") return "row-waiting";
                         if (status === "reject") return "row-reject";
+
+                        if (raw?.toUpperCase() === "WAITING_VENDOR") return "row-wait-vendor";
+                        if (raw?.toUpperCase() === "WAITING_DCI") return "row-wait-dci";
+
                         return "";
                     }}
+
                     summary={() => (
                         <Table.Summary fixed="bottom">
                             <Table.Summary.Row style={{ backgroundColor: "#fafafa", fontWeight: 700 }}>
-                                <Table.Summary.Cell index={0} colSpan={11} align="center">
+                                <Table.Summary.Cell index={0} colSpan={13} align="center">
                                     Grand Total
                                 </Table.Summary.Cell>
-                                <Table.Summary.Cell index={11} align="right">
+                                <Table.Summary.Cell index={13} align="right">
                                     {getGrandTotal()}
                                 </Table.Summary.Cell>
-                                <Table.Summary.Cell index={12}></Table.Summary.Cell>
+                                <Table.Summary.Cell index={14}></Table.Summary.Cell>
                             </Table.Summary.Row>
                         </Table.Summary>
                     )}
                 />
             </div>
+
+            <p className="mt-2 text-blue-800"> Total Record : {dataSource.length}</p>
         </div>
     );
 }

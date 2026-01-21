@@ -8,25 +8,48 @@ const getVendor = () => {
     return http.apiConfirm.get(`getVendor`);
 }
 
-const PostSearchInvoiceRequet = (param: any) => {
-    return http.apiConfirm.post("PostSearchInvoiceRequet", param);
+const PostLoadInvoiceRequet = (param: any) => {
+    return http.apiConfirm.post("PostLoadInvoiceRequet", param);
 }
-
 
 const PostCreateInvoice = (param: any) => {
     return http.apiConfirm.post("PostCreateInvoice", param);
 }
 
-const PostReportACAndVendorHeader = (param: any) => {
-    return http.apiConfirm.post("PostReportACAndVendorHeader", param);
+
+const PostDeleteDocumentNo = (param: any) => {
+    return http.apiConfirm.post("PostDeleteDocumentNo", param);
+}
+
+
+const PostReportVendorHeader = (param: any) => {
+    return http.apiConfirm.post("PostReportVendorHeader", param);
+}
+
+const PostReportVendorDetail = (param: any) => {
+    return http.apiConfirm.post("PostReportVendorDetail", param);
+}
+
+
+const PostConfirmACHeader = (param: any) => {
+    return http.apiConfirm.post("PostConfirmACHeader", param);
 }
 
 const PostReportACAndVendorDetail = (param: any) => {
     return http.apiConfirm.post("PostReportACAndVendorDetail", param);
 }
 
-const PostReceivebilling = (param: any) => {
-    return http.apiConfirm.post("PostReceivebilling", param);
+const PostConfirmBilling = (param: any) => {
+    return http.apiConfirm.post("PostConfirmBilling", param);
+}
+
+
+const PostRejectbilling = (param: any) => {
+    return http.apiConfirm.post("PostRejectbilling", param);
+}
+
+const PostCancelConfirmBilling = (param: any) => {
+    return http.apiConfirm.post("PostCancelConfirmBilling", param);
 }
 
 
@@ -46,17 +69,28 @@ const PostReportVendorDetailPrint = (param: any) => {
     return http.apiConfirm.post("PostReportVendorDetailPrint", param);
 }
 
+const PostConfirmACDetail = (param: any) => {
+    return http.apiConfirm.post("PostConfirmACDetail", param);
+}
+
+
 
 export default {
     getNbr,
     getVendor,
-    PostSearchInvoiceRequet,
+    PostLoadInvoiceRequet,
     PostCreateInvoice,
-    PostReportACAndVendorHeader,
+    PostDeleteDocumentNo,
+    PostReportVendorHeader,
+    PostReportVendorDetail,
+    PostConfirmACHeader,
     PostReportACAndVendorDetail,
-    PostReceivebilling,
+    PostConfirmBilling,
+    PostCancelConfirmBilling,
+    PostRejectbilling,
     PostReportACHeader,
     PostPayment,
     PostReportInvoiceByAC,
     PostReportVendorDetailPrint,
+    PostConfirmACDetail,
 };
