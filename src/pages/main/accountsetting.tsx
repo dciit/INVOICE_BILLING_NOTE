@@ -1,4 +1,5 @@
-import { ContactsOutlined, EnvironmentOutlined, IdcardOutlined, MailOutlined, PhoneOutlined, PrinterOutlined, UserAddOutlined, UserOutlined } from "@ant-design/icons"
+
+import { ContactsOutlined, EnvironmentOutlined,  MailOutlined, PhoneOutlined, PrinterOutlined, UserAddOutlined } from "@ant-design/icons"
 import { Input, Select } from "antd"
 import { useEffect, useState } from "react"
 import type { Autheninfo, BankAccount } from "../../interface/response.interface"

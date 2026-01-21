@@ -1,6 +1,6 @@
 import axios from "axios";
-import { apiAuthen, apiBilling } from "../constants";
-import { type Accfromvendor, type BankAccount, type ResTypeCalendar } from "../interface/response.interface";
+import {  apiBilling } from "../constants";
+import type { Accfromvendor, BankAccount, ResTypeCalendar } from "../interface/response.interface";
 import type { CrCalendar, CrdVenderinfo, UserInfo } from "../interface/mParam";
 
 const http = axios.create({

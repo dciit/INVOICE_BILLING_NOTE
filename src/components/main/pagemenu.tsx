@@ -1,5 +1,5 @@
 import { Menu, type MenuProps } from "antd";
-import { CalendarOutlined, FileProtectOutlined, FileTextOutlined, FormOutlined } from "@ant-design/icons";
+import { AreaChartOutlined, CalendarOutlined, CheckCircleOutlined, CheckOutlined, DashboardOutlined, DollarOutlined, FileProtectOutlined, FileTextOutlined, FormOutlined, LikeOutlined, PieChartOutlined, ReadOutlined } from "@ant-design/icons";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 
@@ -23,44 +23,82 @@ const PageMenu = ({ onCloseDrawer }: PageMenuProps) => {
     const auth = useSelector((state: any) => state.reducer.authen);
 
     const menuItems: MenuItem[] = [
-        ...(auth?.role !== "rol_accountant"
+        ...(auth?.role === "rol_accountant"
+            ? [{
+                key: `/DashboardAC`,
+                label: 'Home',
+                icon: withMenuIcon(DashboardOutlined),
+            }]
+            : []
+        ),
+        ...(auth?.role === "rol_accountant"
+            ? [{
+                key: `/SummaryAC`,
+                label: 'Summary Invoice',
+                icon: withMenuIcon(AreaChartOutlined),
+            }]
+            : []
+        ),
+        ...(auth?.role === "rol_accountant"
+            ? [{
+                key: `/ConfirmAC`,
+                label: 'Confirm Billing',
+                icon: withMenuIcon(CheckOutlined),
+            }]
+            : []
+        ),
+        ...(auth?.role === "rol_accountant"
+            ? [{
+                key: `/Payment`,
+                label: 'Confirm Payment',
+                icon: withMenuIcon(DollarOutlined),
+            }]
+            : []
+        ),
+        // ...(auth?.role === "rol_accountant"
+        //     ? [{
+        //         key: `/ReportAC`,
+        //         label: 'Report',
+        //         icon: withMenuIcon(LikeOutlined),
+        //     }]
+        //     : []
+        // ),
+
+        /******** VENDOR */
+        ...(auth?.role === "rol_vender"
+            ? [{
+                key: `/DashboardVendor`,
+                label: 'Dashboard',
+                icon: withMenuIcon(DashboardOutlined),
+            }]
+            : []
+        ),
+        ...(auth?.role === "rol_vender"
             ? [{
                 key: `/Invoice`,
                 label: 'Invoice',
-                icon: withMenuIcon(FormOutlined),
-            }]
-            : []
-        ),
-        ...(auth?.role === "rol_accountant"
-            ? [{
-                key: `/Invoices`,
-                label: 'Invoice Report',
-                icon: withMenuIcon(FormOutlined),
-            }]
-            : []
-        ),
-        {
-            key: `/ReportVendor`,
-            label: auth?.role === "rol_accountant" ? 'Confirm Invoice' : 'Report',
-            icon: withMenuIcon(FileProtectOutlined),
-        },
-        ...(auth?.role === "rol_accountant"
-            ? [{
-                key: `/ReportAC`,
-                label: 'Report AC',
                 icon: withMenuIcon(FileProtectOutlined),
             }]
             : []
         ),
+        ...(auth?.role === "rol_vender"
+            ? [{
+                key: `/ReportVendor`,
+                label: 'Report',
+                icon: withMenuIcon(LikeOutlined),
+            }]
+            : []
+        ),
+
         {
             key: `/calendarbulling`,
-            label: 'Calendar Bulling Note',
+            label: 'Calendar Billing',
             icon: withMenuIcon(CalendarOutlined)
         },
         {
             key: '/',
             label: 'Manual',
-            icon: withMenuIcon(FileTextOutlined)
+            icon: withMenuIcon(ReadOutlined)
         }
     ];
 

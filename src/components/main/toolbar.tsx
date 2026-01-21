@@ -28,10 +28,10 @@ function ToolbarComponent() {
     }
 
     const handleLogout = () => {
-    localStorage.removeItem('token');
-    dispatch({ type: 'LOGOUT' });
-    navigate('/login', { replace: true });
-};
+        localStorage.removeItem('token');
+        dispatch({ type: 'LOGOUT' });
+        navigate('/login', { replace: true });
+    };
 
 
     const toggleDrawer = (newOpen: boolean) => {
@@ -105,6 +105,8 @@ function ToolbarComponent() {
                     {projectName}
                 </span>
             </div>
+
+          
 
             <div className="flex items-center gap-4 ml-auto">
                 {loadAccountContent ? (

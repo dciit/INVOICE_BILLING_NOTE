@@ -32,7 +32,7 @@ export type MData = {
 
 export default function EBilling_confirm() {
     const auth = useSelector((state: any) => state.reducer.authen);
-    const [fromDate, setFromDate] = useState<Dayjs | null>(dayjs());
+    const [fromDate, setFromDate] = useState<Dayjs | null>(dayjs().startOf("month"));
     const [toDate, setToDate] = useState<Dayjs | null>(dayjs());
     const [selectedKeys, setSelectedKeys] = useState<React.Key[]>([]);
     const [dataSource, setDataSource] = useState<MData[]>([]);
@@ -49,11 +49,10 @@ export default function EBilling_confirm() {
     const fetchData = async () => {
         try {
             setLoading(true);
-            const res = await service.PostSearchInvoiceRequet({
+            const res = await service.PostLoadInvoiceRequet({
                 venderCode: auth.username,
-                invoiceNo: InvoiceNo,
-                invoiceDateFrom: "",
-                invoiceDateTo: ""
+                invoiceDateFrom: fromDate.format("YYYYMMDD"),
+                invoiceDateTo: toDate.format("YYYYMMDD")
             });
             const mappedData = res.data.map((item: any, index: number) => ({
                 ...item,
@@ -61,6 +60,8 @@ export default function EBilling_confirm() {
                 whTaxRate: null,
             }));
             setDataSource(mappedData);
+
+            console.log(mappedData)
         } catch (error) {
             console.error(error);
         } finally {
@@ -86,7 +87,7 @@ export default function EBilling_confirm() {
 
         try {
             setLoading(true);
-            const res = await service.PostSearchInvoiceRequet({
+            const res = await service.PostLoadInvoiceRequet({
                 venderCode: auth.username,
                 invoiceNo: InvoiceNo,
                 invoiceDateFrom: fromDate.format("YYYYMMDD"),
@@ -104,6 +105,8 @@ export default function EBilling_confirm() {
 
             setDataSource(filteredData);
             setSelectedKeys([]);
+
+            console.log("Search", filteredData)
         } catch (error) {
             console.error(error);
         } finally {
@@ -185,7 +188,8 @@ export default function EBilling_confirm() {
                     NETPAID: parseFloat(netPaid.toFixed(2)),
                     BEFORVATAMOUNT: parseFloat(amtb.toFixed(2)),
                     TOTAL_AMOUNT: parseFloat(totalAmount.toFixed(2)),
-                    STATUS: "WAITING",
+                    STATUS: "WAITING_DCI",
+                    ACTYPE: item.actype
                 };
 
                 //console.log("payload", payload)
@@ -211,6 +215,7 @@ export default function EBilling_confirm() {
 
     const columns = [
         { title: "No", dataIndex: "no", width: 60, align: "center" },
+        // { title: "DOCUMENT NO", dataIndex: "documentNo", width: 150, align: "center" },
         { title: "INVOICE NO", dataIndex: "invoiceNo", width: 180, align: "center" },
         { title: "INVOICE DATE", dataIndex: "invoiceDate", width: 120, align: "center" },
         {
@@ -245,7 +250,12 @@ export default function EBilling_confirm() {
             align: "center",
             render: (value: any) => (
                 <div style={{ textAlign: "right" }}>
-                    {value ? Number(value).toLocaleString() : "-"}
+                    {value !== null && value !== undefined
+                        ? Number(value).toLocaleString(undefined, {
+                            minimumFractionDigits: 2,
+                            maximumFractionDigits: 2,
+                        })
+                        : "-"}
                 </div>
             ),
         },
@@ -254,34 +264,45 @@ export default function EBilling_confirm() {
             dataIndex: "whTaxRate",
             align: "center",
             width: 120,
-            render: (val: any, record: any) => (
-                <Select
-                    value={record.whTaxRate}
-                    style={{ width: 90, backgroundColor: "#fffacd" }}
-                    placeholder="เลือก"
-                    onChange={(value) => {
-                        if (value === "ไม่หัก") {
-                            setDataSource(prev =>
-                                prev.map(row => ({ ...row, whTaxRate: "ไม่หัก" }))
-                            );
-                        } else {
-                            setDataSource(prev =>
-                                prev.map(row =>
-                                    row.key === record.key
-                                        ? { ...row, whTaxRate: `${value}%` }
-                                        : row
-                                )
-                            );
-                        }
-                    }}
-                >
-                    <Select.Option value="1">1%</Select.Option>
-                    <Select.Option value="2">2%</Select.Option>
-                    <Select.Option value="3">3%</Select.Option>
-                    <Select.Option value="5">5%</Select.Option>
-                    <Select.Option value="ไม่หัก">ไม่หัก</Select.Option>
-                </Select>
-            ),
+            render: (val: any, record: any) => {
+                const isDisabled =
+                    record.documentNo !== null &&
+                    record.documentNo !== undefined &&
+                    record.documentNo !== "";
+
+                return (
+                    <Select
+                        value={record.whTaxRate}
+                        style={{
+                            width: 90,
+                            backgroundColor: isDisabled ? "#f5f5f5" : "#fffacd",
+                        }}
+                        placeholder="เลือก"
+                        disabled={isDisabled}   // ✅ disable เมื่อมี Document
+                        onChange={(value) => {
+                            if (value === "ไม่หัก") {
+                                setDataSource(prev =>
+                                    prev.map(row => ({ ...row, whTaxRate: "ไม่หัก" }))
+                                );
+                            } else {
+                                setDataSource(prev =>
+                                    prev.map(row =>
+                                        row.key === record.key
+                                            ? { ...row, whTaxRate: `${value}%` }
+                                            : row
+                                    )
+                                );
+                            }
+                        }}
+                    >
+                        <Select.Option value="1">1%</Select.Option>
+                        <Select.Option value="2">2%</Select.Option>
+                        <Select.Option value="3">3%</Select.Option>
+                        <Select.Option value="5">5%</Select.Option>
+                        <Select.Option value="ไม่หัก">ไม่หัก</Select.Option>
+                    </Select>
+                );
+            },
         },
         {
             title: "W/H TAX",
@@ -396,7 +417,7 @@ export default function EBilling_confirm() {
 
             <div style={{ display: "flex", justifyContent: "center", margin: "2px 0 20px 0" }}>
                 <Form layout="inline" style={{ alignItems: "center" }}>
-                    <span style={{ marginRight: 10, fontWeight: 500, fontSize: 16 }}>INVOICE DATE</span>
+                    <span style={{ marginRight: 10, fontWeight: 500, fontSize: 16 }}>Invoice date :</span>
                     <span style={{ marginRight: 10, fontWeight: 500, fontSize: 16 }}>From :</span>
                     <Form.Item>
                         <DatePicker
@@ -404,30 +425,32 @@ export default function EBilling_confirm() {
                             format="DD/MM/YYYY"
                             value={fromDate}
                             onChange={setFromDate}
-                            style={{ height: 40 }}
+                            style={{ height: 32 }}
                         />
                     </Form.Item>
-                    <span style={{ margin: "0 10px", fontWeight: 500, fontSize: 16 }}>To :</span>
+                    <span style={{ margin: "0 10px", fontWeight: 500, fontSize: 14 }}>To :</span>
                     <Form.Item>
                         <DatePicker
                             placeholder="To"
                             format="DD/MM/YYYY"
                             value={toDate}
                             onChange={setToDate}
-                            style={{ height: 40 }}
+                            style={{ height: 32, width: 150 }}
                         />
                     </Form.Item>
+                    <span style={{ margin: "0 10px", fontWeight: 500, fontSize: 14 }}>Invoice No :</span>
                     <Form.Item>
                         <input
                             type="text"
                             placeholder="Invoice No"
                             value={InvoiceNo}
                             onChange={(e) => setInvoiceNo(e.target.value)}
-                            style={{ width: 250, height: 40, padding: "0 10px", borderRadius: 4, border: "1px solid #d9d9d9" }}
+                            style={{ width: 250, height: 32, padding: "0 10px", borderRadius: 4, border: "1px solid #d9d9d9" }}
                         />
                     </Form.Item>
+
                     <Form.Item>
-                        <Button type="primary" onClick={onSearch} loading={loading} style={{ height: 40, borderRadius: 6 }}>
+                        <Button type="primary" onClick={onSearch} loading={loading} style={{ height: 32, borderRadius: 6 }}>
                             Search
                         </Button>
                     </Form.Item>
@@ -450,13 +473,13 @@ export default function EBilling_confirm() {
                     summary={() => (
                         <Table.Summary fixed="bottom">
                             <Table.Summary.Row style={{ backgroundColor: "#fafafa", fontWeight: 700 }}>
-                                <Table.Summary.Cell index={0} colSpan={11} align="center">
+                                <Table.Summary.Cell index={0} colSpan={12} align="center">
                                     Grand Total
                                 </Table.Summary.Cell>
-                                <Table.Summary.Cell index={11} align="right">
+                                <Table.Summary.Cell index={12} align="right">
                                     {getGrandTotal()}
                                 </Table.Summary.Cell>
-                                <Table.Summary.Cell index={12}></Table.Summary.Cell>
+                                <Table.Summary.Cell index={13}></Table.Summary.Cell>
                             </Table.Summary.Row>
                         </Table.Summary>
                     )}
