@@ -1,6 +1,6 @@
 import {apiAuthen} from "../constants";
 import axios from "axios";
-import type { Editpass, GetToken, Login, RequestRegis } from "../interface/mParam";
+import type { Editpass, GetToken, Login, RequestRegis, UserInfo } from "../interface/mParam";
 
 const http = axios.create({
     baseURL: apiAuthen,
@@ -51,6 +51,19 @@ export function API_CHANGEPASS(mParam: Editpass) {
     return new Promise<any>(resolve => {
         http.post(`/editpass`, mParam).then((res) => {
             resolve(res.data)
+        }).catch((e) => {
+            resolve({
+                status: e.response ? e.response.status : 0,
+                message: e.response ? e.response.statusText : e.message
+            })
+        })
+    })
+}
+
+export function API_RESETPASSWORD(mParam: GetToken) {
+    return new Promise<any>(resolve => {
+        http.post(`/repassword`, mParam).then((res) => {
+            resolve(res.data);
         }).catch((e) => {
             resolve({
                 status: e.response ? e.response.status : 0,

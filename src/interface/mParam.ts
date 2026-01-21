@@ -31,9 +31,29 @@ export interface Editpass {
 export interface CrCalendar {
     cldYear: string;
     cldMonth: string;
-    billingStart: string;
-    billingEnd: string;
-    paymentStart?: string | null;
-    paymentEnd?: string | null;
+    dateStart: string;
+    dateEnd: string;
+    cldType: string;
     crBy: string;
+}
+
+export interface UserInfo {
+    username: string;
+}
+
+export interface CrdVenderinfo {
+    username: string;
+    name: string;
+    compname: string;
+    email: string;
+    taxID: string;
+    branchno: string;
+    fax: string;
+    telephone: string;
+    address: string;
+    accountname: string;
+    accountno: string;
+    bName: string;
+    bBranchname: string;
+    bBranchno: string;
 }

@@ -15,11 +15,12 @@ interface ManageMenuProps {
     onCloseDrawer: () => void;
 }
 
-const ManageMenu = ({ onCloseDrawer, handleLogout  }: ManageMenuProps) => {
+const ManageMenu = ({ onCloseDrawer, handleLogout }: ManageMenuProps) => {
     const location = useLocation();
     const navigate = useNavigate();
     const auth = useSelector((state: any) => state.reducer.authen);
     const isAdmin = auth?.role === "rol_admin" || auth?.role === "rol_accountant";
+    const isVendor = auth?.role === "rol_vender";
 
 
     const menuItems: MenuItem[] = [
@@ -29,11 +30,19 @@ const ManageMenu = ({ onCloseDrawer, handleLogout  }: ManageMenuProps) => {
                 label: 'Register',
                 icon: withMenuIcon(UserAddOutlined),
             }] : []),
-        {
-            key: '/accountsetting',
-            label: 'Account Setting',
-            icon: withMenuIcon(SettingOutlined)
-        },
+        ...(isVendor
+            ? [{
+                key: '/accountsetting',
+                label: 'Account Setting',
+                icon: withMenuIcon(SettingOutlined)
+            }] : []
+        ),
+        ...(isAdmin
+            ? [{
+                key: '/confirmsetting',
+                label: 'Confirm Account Setting',
+                icon: withMenuIcon(SettingOutlined)
+            }] : []),
         {
             key: '/changepass',
             label: 'Change Password',

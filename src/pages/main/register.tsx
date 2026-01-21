@@ -37,7 +37,7 @@ function Register() {
             ...prev,
             role,
             usertype: role,
-            password: role === "VENDER" ? "999999" : ""
+            password: "999999"
         }));
         console.log('selected role:', role)
     }, [role]);
@@ -122,7 +122,7 @@ function Register() {
                                             className='text-sm p-2 md:text-sm border border-black rounded-md bg-[#FFF5D7] font-normal text-black flex items-center gap-2 w-[10rem]'
                                         >
                                             <UserOutlined />
-                                            {role == "VENDER" ? ("TEXX ID") : ("USERNAME")}
+                                            {role == "VENDER" ? ("TEX ID") : ("USERNAME")}
                                         </label>
                                         <Input
                                             type='text'
@@ -137,7 +137,7 @@ function Register() {
                                     </div>
                                 </div>
                                 {/* password */}
-                                {role != "VENDER" && (
+                                {/* {role != "VENDER" && (
                                     <div className='mt-4'>
                                         <div className='flex flex-col md:flex-row gap-2'>
                                             <label
@@ -159,7 +159,7 @@ function Register() {
                                             />
                                         </div>
                                     </div>
-                                )}
+                                )} */}
                                 <div>
                                     <Radio.Group
                                         options={plainOptions}

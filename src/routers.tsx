@@ -10,6 +10,7 @@ import ChangePass from "./pages/main/changepass";
 import EBilling_confirmForAC from "./pages/builling/EBilling_confirmForAC";
 import CalendarBulling from "./pages/builling/Calendar_Blling";
 import Accountsetting from "./pages/main/accountsetting";
+import ConfirmSetting from "./pages/main/confirmsetting";
 
 
 function Routers() {
@@ -29,6 +30,7 @@ function Routers() {
                     <Route path="changepass" element={<ChangePass />} />
                     <Route path="calendarbulling" element={<CalendarBulling />} />
                     <Route path="accountsetting" element={<Accountsetting/>} />
+                    <Route path="confirmsetting" element={<ConfirmSetting/>} />
                 </Route>
             </Routes>
         </Router>

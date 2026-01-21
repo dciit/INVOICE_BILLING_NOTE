@@ -41,11 +41,11 @@ function Layout() {
         <>
             {
                 login ?
-                    <div className="h-screen flex flex-col font-sans">
+                    <div className="max-h-screen flex flex-col font-sans">
                         <Toolbar />
-                        <div className="flex-1 bg-[#fdfdfd] pt-2 pb-2 px-2 flex flex-col min-h-0 dark:bg-gray-800">
+                        <div className="flex-1 bg-[#fdfdfd] pt-2 pb-2 px-2 flex flex-col dark:bg-gray-800">
                             <div className="flex-1 bg-white border border-gray-300 dark:bg-gray-800  rounded-md p-3 min-h-0 overflow-hidden">
-                                <div className="h-full">
+                                <div className="h-screen">
                                     <Outlet />
                                 </div>
                             </div>

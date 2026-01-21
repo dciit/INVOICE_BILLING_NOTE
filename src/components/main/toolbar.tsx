@@ -50,7 +50,7 @@ function ToolbarComponent() {
     }, [auth.login]);
 
     return (
-        <div className="h-[50px] bg-[#ABE0F0] border-d border-gray-300 flex justify-between items-center px-3">
+        <div className="h-full bg-[#ABE0F0] border-d border-gray-300 flex justify-between items-center px-3 py-3">
             <div className="flex items-center gap-4">
                 <Button
                     type="text"
