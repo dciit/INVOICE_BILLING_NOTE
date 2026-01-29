@@ -382,7 +382,7 @@ export default function EBilling_SummaryAC() {
                             optionFilterProp="children"
                             filterOption={(input, option) => option.children.toLowerCase().includes(input.toLowerCase())}
                         >
-                            <Select.Option value="%">All</Select.Option>
+                            <Select.Option value="%">ALL</Select.Option>
 
                             {vendorList.map((item, index) => (
                                 <Select.Option key={index} value={item.vender.trim()}>
@@ -414,12 +414,14 @@ export default function EBilling_SummaryAC() {
                     <span style={{ margin: "0 3px", fontWeight: 500, fontSize: 14 }}>Status :</span>
                     <Form.Item>
                         <Select value={status} onChange={setStatus} style={{ width: 200, height: 32 }}>
-                            <Option value="%">All</Option>
-                            <Option value="WAITING_VENDOR">Waiting Vendor Confirm</Option>
-                            <Option value="WAITING_DCI">Waiting DCI Confirm</Option>
-                            <Option value="CONFIRM">Confirm</Option>
-                            <Option value="REJECT">Reject</Option>
-                            <Option value="PAYMENT">Payment</Option>
+                            <Option value="%">ALL</Option>
+                            <Option value="NEW">NEW INVOICE</Option>
+                            <Option value="INVOICE_INCORRECT">INVOICE INCORRECT</Option>
+                            <Option value="WAITING_DCI">WAITING DCI CONFIRM</Option>
+                            <Option value="CONFIRM">CONFIRM</Option>
+                            <Option value="REJECT">REJECT</Option>
+                            <Option value="CANCEL">CANCEL</Option>
+                            <Option value="PAYMENT">PAYMENT</Option>
                         </Select>
                     </Form.Item>
 

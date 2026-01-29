@@ -488,7 +488,7 @@ export default function EBilling_Payment() {
               optionFilterProp="children"
               filterOption={(input, option) => option.children.toLowerCase().includes(input.toLowerCase())}
             >
-              <Select.Option value="%">All</Select.Option>
+              <Select.Option value="%">ALL</Select.Option>
 
               {vendorList.map((item, index) => (
                 <Select.Option key={index} value={item.vender.trim()}>
@@ -603,7 +603,7 @@ export default function EBilling_Payment() {
           loading={loading}
           rowClassName={(record: MData) => {
             const status = record.status?.trim().toLowerCase();
-          
+
             if (status === "payment") return "row-payment";
             if (status === "confirm") return "row-confirm";
             if (status === "waiting") return "row-waiting";

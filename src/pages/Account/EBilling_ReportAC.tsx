@@ -290,7 +290,7 @@ export default function EBilling_ReportAC() {
                             optionFilterProp="children"
                             filterOption={(input, option) => option.children.toLowerCase().includes(input.toLowerCase())}
                         >
-                            <Select.Option value="%">All</Select.Option>
+                            <Select.Option value="%">ALL</Select.Option>
 
                             {vendorList.map((item, index) => (
                                 <Select.Option key={index} value={item.vender.trim()}>

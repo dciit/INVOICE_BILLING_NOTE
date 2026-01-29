@@ -106,7 +106,7 @@ function ToolbarComponent() {
                 </span>
             </div>
 
-          
+
 
             <div className="flex items-center gap-4 ml-auto">
                 {loadAccountContent ? (
@@ -119,8 +119,8 @@ function ToolbarComponent() {
                         <span className="text-black text-lg font-bold uppercase mr-3">
                             {auth.login ? (
                                 <>
-                                    <UserOutlined />{" "}
-                                    {auth.role === "rol_accountant"
+                                    <UserOutlined />{" : "}
+                                    {auth.role === "rol_accountant" || auth.role === "rol_admin"
                                         ? auth.incharge
                                         : auth.vendername}
                                 </>

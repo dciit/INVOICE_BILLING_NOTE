@@ -111,7 +111,7 @@ export default function EBilling_ReportVendor() {
             Swal.fire({
                 icon: "warning",
                 title: "ไม่สามารถลบได้",
-               // text: "ไม่สามารถลบเอกสารได้",
+                // text: "ไม่สามารถลบเอกสารได้",
             });
             return;
         }
@@ -168,8 +168,26 @@ export default function EBilling_ReportVendor() {
 
 
     const columns = [
-        { title: "No", width: 60, align: "center", render: (_: any, __: any, index: number) => index + 1 },
-        { title: "DOCUMENT NO", dataIndex: "documentno", width: 120, align: "center" },
+        {
+            title: "NO", width: 60, align: "center", render: (_: any, __: any, index: number) => index + 1,
+            onHeaderCell: () => ({
+                style: {
+                    backgroundColor: "rgb(248 198 255)",
+                    color: "black",
+                    fontWeight: "bold",
+                },
+            }),
+        },
+        {
+            title: "BILLING NO", dataIndex: "documentno", width: 150, align: "center",
+            onHeaderCell: () => ({
+                style: {
+                    backgroundColor: "rgb(248 198 255)",
+                    color: "black",
+                    fontWeight: "bold",
+                },
+            }),
+        },
         // { title: "INVOICE NO", dataIndex: "invoiceno", width: 120, align: "center" },
         // { title: "INVOICE DATE", dataIndex: "invoicedate", width: 120, align: "center" },
         // {
@@ -180,16 +198,67 @@ export default function EBilling_ReportVendor() {
         //     render: (_: any, record: InvoiceDetail) =>
         //         record.duedate ? record.duedate : null
         // },
-        { title: "TAX ID", dataIndex: "taxid", width: 150, align: "center" },
-        { title: "VENDOR CODE", dataIndex: "vendorcode", width: 150, align: "center" },
-        { title: "VENDOR NAME", dataIndex: "vendorname", width: 260, align: "left" },
-        { title: "PAYMENT TERMS", dataIndex: "paymenT_TERMS", width: 120, align: "center" },
+        {
+            title: "TAX ID", dataIndex: "taxid", width: 150, align: "center",
+            onHeaderCell: () => ({
+                style: {
+                    backgroundColor: "rgb(248 198 255)",
+                    color: "black",
+                    fontWeight: "bold",
+                },
+            }),
+        },
+        {
+            title: "VENDOR CODE", dataIndex: "vendorcode", width: 150, align: "center",
+            onHeaderCell: () => ({
+                style: {
+                    backgroundColor: "rgb(248 198 255)",
+                    color: "black",
+                    fontWeight: "bold",
+                },
+            }),
+        },
+        {
+            title: "VENDER NAME",
+            dataIndex: "vendorname",
+            width: 300,
+            align: "center",
+            render: (value: any) => (
+                <div style={{ textAlign: "left" }}>   {/* TD ชิดซ้าย */}
+                    {value}
+                </div>
+            ),
+            onHeaderCell: () => ({
+                style: {
+                    backgroundColor: "rgb(248 198 255)",
+                    color: "black",
+                    fontWeight: "bold",
+                },
+            }),
+        },
+        {
+            title: "PAYMENT TERMS", dataIndex: "paymenT_TERMS", width: 150, align: "center",
+            onHeaderCell: () => ({
+                style: {
+                    backgroundColor: "rgb(248 198 255)",
+                    color: "black",
+                    fontWeight: "bold",
+                },
+            }),
+        },
         {
             title: "TOTAL AMOUNT",
             dataIndex: "totaL_AMOUNT",
             width: 150,
             align: "right",
             render: (val: any) => Number(val).toLocaleString("en-US", { minimumFractionDigits: 2 }),
+            onHeaderCell: () => ({
+                style: {
+                    backgroundColor: "rgb(248 198 255)",
+                    color: "black",
+                    fontWeight: "bold",
+                },
+            }),
         },
         {
             title: "W/H TAX",
@@ -197,6 +266,13 @@ export default function EBilling_ReportVendor() {
             width: 120,
             align: "right",
             render: (val: any) => Number(val).toLocaleString("en-US", { minimumFractionDigits: 2 }),
+            onHeaderCell: () => ({
+                style: {
+                    backgroundColor: "rgb(248 198 255)",
+                    color: "black",
+                    fontWeight: "bold",
+                },
+            }),
         },
         {
             title: "NET PAID",
@@ -204,6 +280,13 @@ export default function EBilling_ReportVendor() {
             width: 150,
             align: "right",
             render: (val: any) => Number(val).toLocaleString("en-US", { minimumFractionDigits: 2 }),
+            onHeaderCell: () => ({
+                style: {
+                    backgroundColor: "rgb(248 198 255)",
+                    color: "black",
+                    fontWeight: "bold",
+                },
+            }),
         },
         {
             title: "STATUS",
@@ -244,8 +327,19 @@ export default function EBilling_ReportVendor() {
                     return <Tag color="red">CANCEL</Tag>;
                 }
 
+                if (raw.toUpperCase() === "VENDOR_REJECT") {
+                    return <Tag color="red">VENDOR REJECT</Tag>;
+                }
+
                 return <Tag>{value}</Tag>; // อื่นๆ แสดงตามเดิม
             },
+            onHeaderCell: () => ({
+                style: {
+                    backgroundColor: "rgb(248 198 255)",
+                    color: "black",
+                    fontWeight: "bold",
+                },
+            }),
         },
         {
             title: "DETAIL",
@@ -259,7 +353,14 @@ export default function EBilling_ReportVendor() {
                         setIsDetailModalOpen(true);
                     }}
                 />
-            )
+            ),
+            onHeaderCell: () => ({
+                style: {
+                    backgroundColor: "rgb(248 198 255)",
+                    color: "black",
+                    fontWeight: "bold",
+                },
+            }),
         },
         {
             title: "PRINT",
@@ -273,11 +374,18 @@ export default function EBilling_ReportVendor() {
                         setIsDetailModalOpenPrint(true);
                     }}
                 />
-            )
+            ),
+            onHeaderCell: () => ({
+                style: {
+                    backgroundColor: "rgb(248 198 255)",
+                    color: "black",
+                    fontWeight: "bold",
+                },
+            }),
         },
         {
             title: "ATTACH FILE",
-            width: 50,
+            width: 120,
             align: "center",
             render: (_: any, record: InvoiceDetail) => (
                 <LinkOutlined
@@ -287,7 +395,14 @@ export default function EBilling_ReportVendor() {
                         setIsAttachFileModalOpen(true);
                     }}
                 />
-            )
+            ),
+            onHeaderCell: () => ({
+                style: {
+                    backgroundColor: "rgb(248 198 255)",
+                    color: "black",
+                    fontWeight: "bold",
+                },
+            }),
         },
         {
             title: "DELETE",
@@ -314,7 +429,14 @@ export default function EBilling_ReportVendor() {
                         onClick={() => deleteDocumentNo(record)}
                     />
                 );
-            }
+            },
+            onHeaderCell: () => ({
+                style: {
+                    backgroundColor: "rgb(248 198 255)",
+                    color: "black",
+                    fontWeight: "bold",
+                },
+            }),
         }
 
     ];
@@ -382,12 +504,14 @@ export default function EBilling_ReportVendor() {
 
                     <Form.Item>
                         <Select value={status} onChange={setStatus} style={{ width: 200, height: 32 }}>
-                            <Option value="%">All</Option>
-                            <Option value="WAITING_VENDOR">Waiting Vendor Confirm</Option>
-                            <Option value="WAITING_DCI">Waiting DCI Confirm</Option>
-                            <Option value="CONFIRM">Confirm</Option>
-                            <Option value="REJECT">Reject</Option>
-                            <Option value="PAYMENT">Payment</Option>
+                            <Option value="%">ALL</Option>
+                            <Option value="NEW">NEW INVOICE</Option>
+                            <Option value="INVOICE_INCORRECT">INVOICE INCORRECT</Option>
+                            <Option value="WAITING_DCI">WAITING DCI CONFIRM</Option>
+                            <Option value="CONFIRM">CONFIRM</Option>
+                            <Option value="REJECT">REJECT</Option>
+                            <Option value="CANCEL">CANCEL</Option>
+                            <Option value="PAYMENT">PAYMENT</Option>
                         </Select>
                     </Form.Item>
 
@@ -428,13 +552,14 @@ export default function EBilling_ReportVendor() {
                     loading={loading}
                     rowClassName={(record: MData) => {
                         const status = record.status?.trim().toLowerCase();
-
+                        console.log("status", status)
                         if (status === "payment") return "row-payment";
                         if (status === "confirm") return "row-confirm";
                         if (status === "waiting") return "row-waiting";
                         if (status === "reject") return "row-reject";
                         if (status === "cancel") return "row-reject";
                         if (status === "cancel_payment") return "row-reject";
+                        if (status === "vendor_reject") return "row-reject";
 
                         return "";
                     }}

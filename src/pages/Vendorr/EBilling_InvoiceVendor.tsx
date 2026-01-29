@@ -278,7 +278,7 @@ export default function EBilling_confirm() {
                     NETPAID: parseFloat(netPaid.toFixed(2)),
                     BEFORVATAMOUNT: parseFloat(amtb.toFixed(2)),
                     TOTAL_AMOUNT: parseFloat(totalAmount.toFixed(2)),
-                    STATUS: "VENDOR_REJECT",
+                    STATUS: "INVOICE_INCORRECT",
                     ACTYPE: item.actype,
                     IS_INVOICECORRECT: confirmStatus,
                     INVOICE_VERIFICATION_REMARK: remark,
@@ -308,10 +308,33 @@ export default function EBilling_confirm() {
 
 
     const columns = [
-        { title: "No", dataIndex: "no", width: 60, align: "center" },
-        // { title: "DOCUMENT NO", dataIndex: "documentNo", width: 150, align: "center" },
-        { title: "INVOICE NO", dataIndex: "invoiceNo", width: 180, align: "center" },
-        { title: "INVOICE DATE", dataIndex: "invoiceDate", width: 120, align: "center" },
+        {
+            title: "No", dataIndex: "no", width: 60, align: "center", onHeaderCell: () => ({
+                style: {
+                    backgroundColor: "rgb(248 198 255)",
+                    color: "black",
+                    fontWeight: "bold",
+                },
+            }),
+        },
+        {
+            title: "INVOICE NO", dataIndex: "invoiceNo", width: 180, align: "center", onHeaderCell: () => ({
+                style: {
+                    backgroundColor: "rgb(248 198 255)",
+                    color: "black",
+                    fontWeight: "bold",
+                },
+            }),
+        },
+        {
+            title: "INVOICE DATE", dataIndex: "invoiceDate", width: 120, align: "center", onHeaderCell: () => ({
+                style: {
+                    backgroundColor: "rgb(248 198 255)",
+                    color: "black",
+                    fontWeight: "bold",
+                },
+            }),
+        },
         {
             title: "VENDER NAME",
             dataIndex: "vendorName",
@@ -321,11 +344,41 @@ export default function EBilling_confirm() {
                 <div style={{ textAlign: "left" }}>   {/* TD ชิดซ้าย */}
                     {value}
                 </div>
-            ),
+            ), onHeaderCell: () => ({
+                style: {
+                    backgroundColor: "rgb(248 198 255)",
+                    color: "black",
+                    fontWeight: "bold",
+                },
+            }),
         },
-        { title: "PAYMENT TERMS", dataIndex: "paymentTerms", width: 150, align: "center" },
-        { title: "DUE DATE", dataIndex: "duedate", width: 120, align: "center" },
-        { title: "CURRENCY", dataIndex: "currency", width: 80, align: "center" },
+        {
+            title: "PAYMENT TERMS", dataIndex: "paymentTerms", width: 150, align: "center", onHeaderCell: () => ({
+                style: {
+                    backgroundColor: "rgb(248 198 255)",
+                    color: "black",
+                    fontWeight: "bold",
+                },
+            }),
+        },
+        {
+            title: "DUE DATE", dataIndex: "duedate", width: 120, align: "center", onHeaderCell: () => ({
+                style: {
+                    backgroundColor: "rgb(248 198 255)",
+                    color: "black",
+                    fontWeight: "bold",
+                },
+            }),
+        },
+        {
+            title: "CURRENCY", dataIndex: "currency", width: 80, align: "center", onHeaderCell: () => ({
+                style: {
+                    backgroundColor: "rgb(248 198 255)",
+                    color: "black",
+                    fontWeight: "bold",
+                },
+            }),
+        },
         {
             title: "AMOUNT (BAHT)",
             dataIndex: "amtb",
@@ -335,7 +388,13 @@ export default function EBilling_confirm() {
                 <div style={{ textAlign: "right" }}>
                     {value ? Number(value).toLocaleString() : "-"}
                 </div>
-            ),
+            ), onHeaderCell: () => ({
+                style: {
+                    backgroundColor: "rgb(248 198 255)",
+                    color: "black",
+                    fontWeight: "bold",
+                },
+            }),
         },
         {
             title: "VAT IN",
@@ -351,7 +410,13 @@ export default function EBilling_confirm() {
                         })
                         : "-"}
                 </div>
-            ),
+            ), onHeaderCell: () => ({
+                style: {
+                    backgroundColor: "rgb(248 198 255)",
+                    color: "black",
+                    fontWeight: "bold",
+                },
+            }),
         },
         {
             title: "W/H TAX RATE %",
@@ -396,7 +461,13 @@ export default function EBilling_confirm() {
                         <Select.Option value="ไม่หัก">ไม่หัก</Select.Option>
                     </Select>
                 );
-            },
+            }, onHeaderCell: () => ({
+                style: {
+                    backgroundColor: "rgb(248 198 255)",
+                    color: "black",
+                    fontWeight: "bold",
+                },
+            }),
         },
         {
             title: "W/H TAX",
@@ -413,7 +484,14 @@ export default function EBilling_confirm() {
                         })}
                     </div>
                 );
-            }
+            },
+            onHeaderCell: () => ({
+                style: {
+                    backgroundColor: "rgb(248 198 255)",
+                    color: "black",
+                    fontWeight: "bold",
+                },
+            }),
         },
         {
             title: "TOTAL AMOUNT",
@@ -433,7 +511,14 @@ export default function EBilling_confirm() {
                         })}
                     </div>
                 );
-            }
+            },
+            onHeaderCell: () => ({
+                style: {
+                    backgroundColor: "rgb(248 198 255)",
+                    color: "black",
+                    fontWeight: "bold",
+                },
+            }),
         },
         {
             title: (
@@ -487,6 +572,13 @@ export default function EBilling_confirm() {
                     }}
                 />
             ),
+            onHeaderCell: () => ({
+                style: {
+                    backgroundColor: "rgb(248 198 255)",
+                    color: "black",
+                    fontWeight: "bold",
+                },
+            }),
         },
     ];
 
