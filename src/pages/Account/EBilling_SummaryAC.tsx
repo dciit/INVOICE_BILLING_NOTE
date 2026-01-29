@@ -452,6 +452,9 @@ export default function EBilling_SummaryAC() {
                         if (status === "waiting") return "row-waiting";
                         if (status === "reject") return "row-reject";
                         if (status === "cancel_payment") return "row-reject";
+                        if (status === "new") return "row-new";
+
+
 
                         return "";
                     }}

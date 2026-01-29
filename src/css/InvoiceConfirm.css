@@ -36,3 +36,7 @@
 .row-reject td {
     background-color: #f8b7bd !important;
 }
+
+.row-new td {
+    background-color: #d8f3ff !important;
+}
