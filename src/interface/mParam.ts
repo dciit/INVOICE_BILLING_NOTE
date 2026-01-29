@@ -41,6 +41,11 @@ export interface UserInfo {
     username: string;
 }
 
+export interface RejectVdInfo {
+    username: string;
+    remark: string;
+}
+
 export interface CrdVenderinfo {
     username: string;
     name: string;

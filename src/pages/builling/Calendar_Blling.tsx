@@ -108,7 +108,7 @@ function CalendarBulling() {
             if (item.eventtype == "vacation") {
                 const start = dayjs(item.startdate, 'DD-MM-YYYY').startOf('day');
                 const end = dayjs(item.enddate, 'DD-MM-YYYY').startOf('day');
-                
+
                 if (currentDate.isBetween(start, end, null, '[]')) {
                     listData.push({ type: 'success', content: 'วันหยุดนักขัตฤกษ์' });
                 }
@@ -161,14 +161,18 @@ function CalendarBulling() {
 
     const handleCreateCalendar = async () => {
         try {
-            const crdcalendar = await API_CREATECALENDARBILLING({
-                cldYear: dayjs(dateStr).format('YYYY'),
-                cldMonth: dayjs(dateStr).format('MM'),
-                dateStart: dateStr,
-                dateEnd: dateEnd,
+
+            const payload = {
+                cldYear: dayjs(dateStr).format('YYYY'),      
+                cldMonth: dayjs(dateStr).format('MM'),      
+                dateStart: dayjs(dateStr).format('DD-MM-YYYY'),  
+                dateEnd: dayjs(dateEnd).format('DD-MM-YYYY'),    
                 cldType: typecldSelected,
                 crBy: redux.authen.incharge
-            });
+            };
+
+            console.log('Payload for creating calendar:', payload);
+            const crdcalendar = await API_CREATECALENDARBILLING(payload);
 
             if (crdcalendar.result === 1) {
                 Swal.fire({
@@ -234,7 +238,7 @@ function CalendarBulling() {
                     </div>
                 )}
                 <hr className="border-gray-100" />
-                <div className="flex flex-col justify-start">
+                <div className="flex flex-row justify-start">
                     <div className="flex flex-row items-center">
                         <Badge size="default" status="processing" className="font-semibold px-4 py-2 rounded-lg" />
                         <span className="text-lg font-normal">วันวางบิล</span>
@@ -242,6 +246,14 @@ function CalendarBulling() {
                     <div className="flex flex-row items-center">
                         <Badge size="default" status="warning" className="font-semibold px-4 py-2 rounded-lg" />
                         <span className="text-lg font-normal">วันจ่ายเงิน</span>
+                    </div>
+                    <div className="flex flex-row items-center">
+                        <Badge size="default" status="default" className="font-semibold px-4 py-2 rounded-lg" />
+                        <span className="text-lg font-normal">วันตัดรอบรับเอกสาร</span>
+                    </div>
+                    <div className="flex flex-row items-center">
+                        <Badge size="default" status="success" className="font-semibold px-4 py-2 rounded-lg" />
+                        <span className="text-lg font-normal">วันหยุดนักขัตฤกษ์</span>
                     </div>
                 </div>
                 <div className="border border-gray-200 rounded-lg bg-gray-200">
