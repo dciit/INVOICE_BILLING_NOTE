@@ -217,7 +217,7 @@ function CalendarBulling() {
                             placeholder="Slect Type Calendar"
                             options={typecldOptions}
                             onChange={(value) => setTypecldSelected((value))}
-                            className="w-48"
+                            className="w-56"
                         />
                         <RangePicker
                             value={[dayjs(dateStr, dateFormat), dayjs(dateEnd, dateFormat)]}
