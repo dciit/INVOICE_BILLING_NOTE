@@ -1,7 +1,7 @@
 import axios from "axios";
 import {  apiBilling } from "../constants";
 import type { Accfromvendor, BankAccount, ResTypeCalendar } from "../interface/response.interface";
-import type { CrCalendar, CrdVenderinfo, UserInfo } from "../interface/mParam";
+import type { CrCalendar, CrdVenderinfo, RejectVdInfo, UserInfo } from "../interface/mParam";
 
 const http = axios.create({
     baseURL: apiBilling,
@@ -114,6 +114,18 @@ export function API_ACCOUNTSETTINGDATA_FROMVENDOR() {
 export function API_CONFIRMACCOUNTSETTING(mParam: UserInfo) {
     return new Promise<any>(resolve => {
         http.post(`/confirmaccsetting`, mParam).then((res) => {
+            resolve(res.data)
+        }).catch((e) => {
+            throw(e)
+        })
+    })
+}
+
+
+//new part
+export function API_REJECTACCOUNTSETTING(mParam: RejectVdInfo) {
+    return new Promise<any>(resolve => {
+        http.post(`/rejectaccsetting`, mParam).then((res) => {
             resolve(res.data)
         }).catch((e) => {
             throw(e)

@@ -1,13 +1,22 @@
 import { CheckSquareOutlined } from "@ant-design/icons";
-import { Input, Table } from "antd";
+import { Input, Modal, Table } from "antd";
 import { useEffect, useState } from "react";
 import type { Accfromvendor } from "../../interface/response.interface";
-import { API_ACCOUNTSETTINGDATA_FROMVENDOR, API_CONFIRMACCOUNTSETTING } from "../../service/infobilling.service";
+import { API_ACCOUNTSETTINGDATA_FROMVENDOR, API_CONFIRMACCOUNTSETTING, API_REJECTACCOUNTSETTING } from "../../service/infobilling.service";
 import Swal from "sweetalert2";
+
+interface Props {
+    open: boolean;
+    close: (val: boolean) => void
+}
 
 function ConfirmSetting() {
 
     const [dataAcc, setDataAcc] = useState<Accfromvendor[]>([]);
+    // new state here 
+    const [remark, setRemark] = useState<string>("");
+    const [showRemarkModal, setShowRemarkModal] = useState(false);
+    const [username, setUsername] = useState<string>("");
 
     useEffect(() => {
         const fetchAccfromvd = async () => {
@@ -39,6 +48,58 @@ function ConfirmSetting() {
                 if (result.isConfirmed) {
                     Swal.fire("Confirmed", "", "success")
                     setDataAcc([]);
+                } else if (result.isDenied) {
+                    Swal.fire("Information are not confirm", "", "info");
+                }
+            });
+        } else {
+            Swal.fire({
+                icon: "error",
+                title: 'Confirmation failed!',
+                text: 'It have something wrong. try again!'
+            })
+        }
+    }
+
+    //new function here
+    const handleshowmodal = (username: string) => {
+        setUsername(username);
+
+        Swal.fire({
+            title: 'Do you want to reject this information?',
+            showDenyButton: true,
+            showCancelButton: true,
+            confirmButtonText: "Confirm",
+            denyButtonText: `Don't Confirm`
+        }).then((result) => {
+            if (result.isConfirmed) {
+                setShowRemarkModal(true);
+            } else if (result.isDenied) {
+                Swal.fire("Information are not confirm", "", "info");
+            }
+        });
+    }
+
+    //new function here
+    const handleReject = async (username: string, remark: string) => {
+        const res = await API_REJECTACCOUNTSETTING({
+            username: username,
+            remark: remark
+        })
+
+        if (res.result === 1) {
+            Swal.fire({
+                title: 'Do you want to reject this information?',
+                showDenyButton: true,
+                showCancelButton: true,
+                confirmButtonText: "Confirm",
+                denyButtonText: `Don't Confirm`
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    Swal.fire("Confirmed", "", "success")
+                    setDataAcc([]);
+                    setRemark("");
+                    setShowRemarkModal(false);
                 } else if (result.isDenied) {
                     Swal.fire("Information are not confirm", "", "info");
                 }
@@ -137,7 +198,13 @@ function ConfirmSetting() {
                     >
                         CONFIRM
                     </button>
-                    <button className="p-2 bg-red-600 border-red-600 hover:bg-red-700 hover:border-red-700 text-white rounded-lg">REJECT</button>
+                    <button
+                        className="p-2 bg-red-600 border-red-600 hover:bg-red-700 hover:border-red-700 text-white rounded-lg"
+                        onClick={() => handleshowmodal(row.username)}
+                    >
+                        REJECT
+                    </button>
+
                 </div>
 
             )
@@ -169,7 +236,34 @@ function ConfirmSetting() {
                     scroll={{ x: 'max-content' }}
                 />
             </div>
+            {/*new modal */}
+            <Modal open={showRemarkModal} onCancel={() => setShowRemarkModal(false)} footer={<></>} width='30%' height='50%'>
+                <p className="text-red-600 text-lg font-bold flex justify-center">Please provide a reason for your rejection.</p>
+                <hr className="mx-2" />
+                <div className="flex flex-col justify-center items-start gap-2 m-2">
+                    <label htmlFor="remark" className="text-black text-sm font-semibold">REASON</label>
+                    <Input.TextArea
+                        id='remark'
+                        // readOnly
+                        placeholder='Enter Your Reason...'
+                        className='w-full text-sm p-2 text-gray-400'
+                        value={remark}
+                        onChange={(e) => setRemark(e.target.value)}
+                    />
+                </div>
+                <div className="flex justify-center items-center my-3">
+                    <button
+                        type="button"
+                        className="px-5 py-2 bg-blue-600 border-blue-600 hover:bg-blue-700 hover:border-blue-700 text-sm text-white font-semibold rounded-lg"
+                        onClick={() => handleReject(username, remark)}
+                    >
+                        Reset
+                    </button>
+                </div>
+
+            </Modal>
         </div>
+
     )
 }
 

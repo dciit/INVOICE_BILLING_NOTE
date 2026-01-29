@@ -113,22 +113,22 @@ function Accountsetting() {
                 }).then((result) => {
                     if (result.isConfirmed) {
                         Swal.fire('Saved', '', 'success')
-                        setAuthenInfo({
-                            username: "",
-                            usertype: "",
-                            companY_NAME: "",
-                            email: "",
-                            telephone: "",
-                            taxid: "",
-                            fax: "",
-                            compantbranch: "",
-                            address: "",
-                            accounT_NAME: "",
-                            accounT_NUMER: "",
-                            banK_NAME: "",
-                            bankbrancH_NAME: "",
-                            bankbrancH_NO: ""
-                        });
+                        // setAuthenInfo({
+                        //     username: "",
+                        //     usertype: "",
+                        //     companY_NAME: "",
+                        //     email: "",
+                        //     telephone: "",
+                        //     taxid: "",
+                        //     fax: "",
+                        //     compantbranch: "",
+                        //     address: "",
+                        //     accounT_NAME: "",
+                        //     accounT_NUMER: "",
+                        //     banK_NAME: "",
+                        //     bankbrancH_NAME: "",
+                        //     bankbrancH_NO: ""
+                        // });
                     } else if (result.isDenied) {
                         Swal.fire('Changes are not saved', '', 'info')
                     }
