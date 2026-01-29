@@ -8,6 +8,10 @@ const getVendor = () => {
     return http.apiConfirm.get(`getVendor`);
 }
 
+const getINVCHECK = () => {
+    return http.apiConfirm.get(`getINVCHECK`);
+}
+
 const PostLoadInvoiceRequet = (param: any) => {
     return http.apiConfirm.post("PostLoadInvoiceRequet", param);
 }
@@ -39,19 +43,6 @@ const PostReportACAndVendorDetail = (param: any) => {
     return http.apiConfirm.post("PostReportACAndVendorDetail", param);
 }
 
-const PostConfirmBilling = (param: any) => {
-    return http.apiConfirm.post("PostConfirmBilling", param);
-}
-
-
-const PostRejectbilling = (param: any) => {
-    return http.apiConfirm.post("PostRejectbilling", param);
-}
-
-const PostCancelConfirmBilling = (param: any) => {
-    return http.apiConfirm.post("PostCancelConfirmBilling", param);
-}
-
 
 const PostReportACHeader = (param: any) => {
     return http.apiConfirm.post("PostReportACHeader", param);
@@ -69,15 +60,18 @@ const PostReportVendorDetailPrint = (param: any) => {
     return http.apiConfirm.post("PostReportVendorDetailPrint", param);
 }
 
-const PostConfirmACDetail = (param: any) => {
-    return http.apiConfirm.post("PostConfirmACDetail", param);
+const PostInvoiceincorrect = (param: any) => {
+    return http.apiConfirm.post("PostInvoiceincorrect", param);
 }
+
+
 
 
 
 export default {
     getNbr,
     getVendor,
+    getINVCHECK,
     PostLoadInvoiceRequet,
     PostCreateInvoice,
     PostDeleteDocumentNo,
@@ -85,12 +79,9 @@ export default {
     PostReportVendorDetail,
     PostConfirmACHeader,
     PostReportACAndVendorDetail,
-    PostConfirmBilling,
-    PostCancelConfirmBilling,
-    PostRejectbilling,
     PostReportACHeader,
     PostPayment,
     PostReportInvoiceByAC,
     PostReportVendorDetailPrint,
-    PostConfirmACDetail,
+    PostInvoiceincorrect,
 };

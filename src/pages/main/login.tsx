@@ -77,7 +77,7 @@ function LoginPage() {
                 username: loginData.username,
                 password: loginData.password
             });
-            console.log(gettoken)
+
 
             if (gettoken.result === -2) {
                 Swal.fire({
@@ -128,6 +128,7 @@ function LoginPage() {
             });
 
             if (reslogin.result === 'OK') {
+                console.log("login", reslogin)
                 setLogin({ login: true, load: false, message: 'success' });
                 const token = gettoken.result;
                 dispatch({
@@ -139,9 +140,11 @@ function LoginPage() {
                         username: reslogin.username,
                         incharge: reslogin.incharge,
                         vendername: reslogin.vendername,
+                        vendercode: reslogin.venderCode,
                         role: reslogin.role,
                         login: true
                     }
+
                 });
                 localStorage.setItem('token', token);
                 navigate(`${base}/homepage`)

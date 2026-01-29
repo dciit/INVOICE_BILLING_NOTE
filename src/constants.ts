@@ -13,8 +13,8 @@ const apiAuthen = 'https://localhost:44343/api/authen'
 const apiConfirm = 'https://localhost:44343/api/ConfirmInvoice'
 const apiBilling = 'https://localhost:44343/api/ebilling'
 const apiAttachFile = 'https://localhost:44343/api/Attachfile'
+const apiAccount = 'https://localhost:44343/api/Account/'
 
 
-
-export { base, version, apiAuthen, apiConfirm, apiBilling, apiAttachFile, projectName, image };
+export { base, version, apiAuthen, apiConfirm, apiBilling, apiAttachFile, apiAccount, projectName, image };
 

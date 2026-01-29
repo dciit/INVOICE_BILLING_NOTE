@@ -3,7 +3,8 @@ import React, { useEffect, useState } from "react";
 import { DatePicker, Button, Form, Divider, Table, Select, Tag } from "antd";
 import { FormOutlined } from "@ant-design/icons";
 import type { Dayjs } from "dayjs";
-import service from "../../service/confirm.service";
+import service from "../../service/account.service";
+import svrMain from "../../service/confirm.service";
 import { useSelector } from "react-redux";
 import "../../css/InvoiceConfirm.css";
 import Swal from "sweetalert2";
@@ -48,12 +49,12 @@ export default function EBilling_SummaryAC() {
 
 
     useEffect(() => {
-       // fetchData();
+
     }, [auth.username]);
 
 
     useEffect(() => {
-        service.getVendor().then((res) => {
+        svrMain.getVendor().then((res) => {
             try {
                 setVendorList(res.data);
             } catch (error) {
@@ -64,43 +65,7 @@ export default function EBilling_SummaryAC() {
 
 
 
-    const fetchData = async () => {
-        try {
-            setLoading(true);
-            const res = await service.PostReportInvoiceByAC({
-                venderCode: vendor || "%",
-                invoiceNo: InvoiceNo || "%",
-                invoiceDateFrom: fromDate.format("YYYYMMDD"),
-                invoiceDateTo: toDate.format("YYYYMMDD"),
-                status: status,
-                actype: ACType
-            });
 
-            const mappedData = res.data.map((item: any, index: number) => ({
-                key: index,
-                no: index + 1,
-                amtb: item.amtb,
-                currency: item.currency,
-                duedate: item.duedate,
-                invoiceDate: item.invoicedate,
-                invoiceNo: item.invoiceno,
-                paymentTerms: item.paymenT_TERMS,
-                vendorName: item.vendorname,
-                status: item.status,
-                vat: item.totalvat,
-                whTaxRate: item.whtax,
-                totalAmount: item.totaL_AMOUNT,
-            }));
-
-
-
-            setDataSource(mappedData);
-        } catch (error) {
-            console.error(error);
-        } finally {
-            setLoading(false);
-        }
-    };
 
     const onSearch = async () => {
         if (!fromDate || !toDate) {
@@ -113,7 +78,7 @@ export default function EBilling_SummaryAC() {
 
         try {
             setLoading(true);
-            const res = await service.PostReportInvoiceByAC({
+            const res = await service.SummaryAllinvoice({
                 venderCode: vendor || "%",
                 invoiceNo: InvoiceNo || "%",
                 invoiceDateFrom: fromDate.format("YYYYMMDD"),
@@ -347,11 +312,11 @@ export default function EBilling_SummaryAC() {
                 const status = raw.toLowerCase();
 
                 if (status === "payment") {
-                    return <Tag color="green">Payment</Tag>;
+                    return <Tag color="green">PAYMENT</Tag>;
                 }
 
                 if (status === "confirm") {
-                    return <Tag color="blue">Confirm</Tag>;
+                    return <Tag color="blue">CONFIRM</Tag>;
                 }
 
                 if (raw.toUpperCase() === "WAITING_VENDOR") {
@@ -360,6 +325,10 @@ export default function EBilling_SummaryAC() {
 
                 if (raw.toUpperCase() === "WAITING_DCI") {
                     return <Tag color="gold">Waiting DCI Confirm</Tag>;
+                }
+
+                if (raw.toUpperCase() === "CANCEL_PAYMENT") {
+                    return <Tag color="red">CANCEL PAYMENT</Tag>;
                 }
 
                 return <Tag>{value}</Tag>; // อื่นๆ แสดงตามเดิม
@@ -480,9 +449,7 @@ export default function EBilling_SummaryAC() {
                         if (status === "confirm") return "row-confirm";
                         if (status === "waiting") return "row-waiting";
                         if (status === "reject") return "row-reject";
-
-                        if (raw?.toUpperCase() === "WAITING_VENDOR") return "row-wait-vendor";
-                        if (raw?.toUpperCase() === "WAITING_DCI") return "row-wait-dci";
+                        if (status === "cancel_payment") return "row-reject";
 
                         return "";
                     }}

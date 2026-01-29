@@ -10,6 +10,7 @@ const initialState: ReduxInterface = {
         login: false,
         incharge: "",
         vendername: "",
+        vendercode:"",
         role: ""
     }
 }

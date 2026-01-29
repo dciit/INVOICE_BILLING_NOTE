@@ -1,6 +1,6 @@
 
 import React, { useEffect, useState } from "react";
-import { DatePicker, Button, Form, Divider, Table, Select } from "antd";
+import { DatePicker, Button, Form, Divider, Table, Select, Tag } from "antd";
 import { FileProtectOutlined, PrinterOutlined, SearchOutlined, LinkOutlined, DeleteOutlined } from "@ant-design/icons";
 import type { Dayjs } from "dayjs";
 import service from "../../service/confirm.service";
@@ -83,7 +83,7 @@ export default function EBilling_ReportVendor() {
         try {
             setLoading(true);
             const res = await service.PostReportVendorHeader({
-                venderCode: auth.username,
+                venderCode: auth.vendercode,
                 invoiceDateFrom: fromDate.format("YYYY-MM-DD"),
                 invoiceDateTo: toDate.format("YYYY-MM-DD"),
                 status: status,
@@ -111,7 +111,7 @@ export default function EBilling_ReportVendor() {
             Swal.fire({
                 icon: "warning",
                 title: "ไม่สามารถลบได้",
-                text: "สามารถลบได้เฉพาะสถานะ WAITING_DCI หรือ REJECT เท่านั้น",
+               // text: "ไม่สามารถลบเอกสารได้",
             });
             return;
         }
@@ -213,12 +213,38 @@ export default function EBilling_ReportVendor() {
             render: (value: string) => {
                 if (!value) return "-";
 
-                if (value === "WAITING_VENDOR") return "Waiting Vendor Confirm";
-                if (value === "WAITING_DCI") return "Waiting DCI Confirm";
+                const raw = value.trim();
+                const status = raw.toLowerCase();
 
+                if (status === "payment") {
+                    return <Tag color="green">PAYMENT</Tag>;
+                }
 
+                if (status === "confirm") {
+                    return <Tag color="blue">CONFIRM</Tag>;
+                }
 
-                return value; // อื่น ๆ แสดงตามเดิม
+                if (raw.toUpperCase() === "WAITING_VENDOR") {
+                    return <Tag color="orange">Waiting Vendor Confirm</Tag>;
+                }
+
+                if (raw.toUpperCase() === "WAITING_DCI") {
+                    return <Tag color="gold">Waiting DCI Confirm</Tag>;
+                }
+
+                if (raw.toUpperCase() === "CANCEL_PAYMENT") {
+                    return <Tag color="red">CANCEL PAYMENT</Tag>;
+                }
+
+                if (raw.toUpperCase() === "REJECT") {
+                    return <Tag color="red">REJECT</Tag>;
+                }
+
+                if (raw.toUpperCase() === "CANCEL") {
+                    return <Tag color="red">CANCEL</Tag>;
+                }
+
+                return <Tag>{value}</Tag>; // อื่นๆ แสดงตามเดิม
             },
         },
         {
@@ -303,7 +329,7 @@ export default function EBilling_ReportVendor() {
             <div style={{ display: "flex", alignItems: "center" }}>
                 <FileProtectOutlined style={{ fontSize: 28, marginRight: 10, color: "#1890ff" }} />
                 <p style={{ fontWeight: 600, fontSize: 20, margin: 0 }}>
-                    Report
+                    Report Billing
                 </p>
             </div>
 
@@ -407,6 +433,9 @@ export default function EBilling_ReportVendor() {
                         if (status === "confirm") return "row-confirm";
                         if (status === "waiting") return "row-waiting";
                         if (status === "reject") return "row-reject";
+                        if (status === "cancel") return "row-reject";
+                        if (status === "cancel_payment") return "row-reject";
+
                         return "";
                     }}
                     summary={() => (

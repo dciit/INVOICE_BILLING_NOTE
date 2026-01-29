@@ -22,8 +22,14 @@ const PageMenu = ({ onCloseDrawer }: PageMenuProps) => {
     const navigate = useNavigate();
     const auth = useSelector((state: any) => state.reducer.authen);
 
+    const isAccountant = auth?.role === "rol_accountant";
+    const isVendor = auth?.role === "rol_vender";
+    const isAdmin = auth?.role === "rol_admin";
+
+
     const menuItems: MenuItem[] = [
-        ...(auth?.role === "rol_accountant"
+        /******** ACCOUNTANT ********/
+        ...((isAccountant || isAdmin)
             ? [{
                 key: `/DashboardAC`,
                 label: 'Home',
@@ -31,7 +37,7 @@ const PageMenu = ({ onCloseDrawer }: PageMenuProps) => {
             }]
             : []
         ),
-        ...(auth?.role === "rol_accountant"
+        ...((isAccountant || isAdmin)
             ? [{
                 key: `/SummaryAC`,
                 label: 'Summary Invoice',
@@ -39,7 +45,7 @@ const PageMenu = ({ onCloseDrawer }: PageMenuProps) => {
             }]
             : []
         ),
-        ...(auth?.role === "rol_accountant"
+        ...((isAccountant || isAdmin)
             ? [{
                 key: `/ConfirmAC`,
                 label: 'Confirm Billing',
@@ -47,7 +53,7 @@ const PageMenu = ({ onCloseDrawer }: PageMenuProps) => {
             }]
             : []
         ),
-        ...(auth?.role === "rol_accountant"
+        ...((isAccountant || isAdmin)
             ? [{
                 key: `/Payment`,
                 label: 'Confirm Payment',
@@ -55,17 +61,9 @@ const PageMenu = ({ onCloseDrawer }: PageMenuProps) => {
             }]
             : []
         ),
-        // ...(auth?.role === "rol_accountant"
-        //     ? [{
-        //         key: `/ReportAC`,
-        //         label: 'Report',
-        //         icon: withMenuIcon(LikeOutlined),
-        //     }]
-        //     : []
-        // ),
 
-        /******** VENDOR */
-        ...(auth?.role === "rol_vender"
+        /******** VENDOR ********/
+        ...((isVendor || isAdmin)
             ? [{
                 key: `/DashboardVendor`,
                 label: 'Dashboard',
@@ -73,33 +71,34 @@ const PageMenu = ({ onCloseDrawer }: PageMenuProps) => {
             }]
             : []
         ),
-        ...(auth?.role === "rol_vender"
+        ...((isVendor || isAdmin)
             ? [{
                 key: `/Invoice`,
-                label: 'Invoice',
+                label: 'Confirm Invoice',
                 icon: withMenuIcon(FileProtectOutlined),
             }]
             : []
         ),
-        ...(auth?.role === "rol_vender"
+        ...((isVendor || isAdmin)
             ? [{
                 key: `/ReportVendor`,
-                label: 'Report',
+                label: 'Report Billing',
                 icon: withMenuIcon(LikeOutlined),
             }]
             : []
         ),
 
+        /******** COMMON ********/
         {
             key: `/calendarbulling`,
             label: 'Calendar Billing',
-            icon: withMenuIcon(CalendarOutlined)
+            icon: withMenuIcon(CalendarOutlined),
         },
         {
             key: '/',
             label: 'Manual',
-            icon: withMenuIcon(ReadOutlined)
-        }
+            icon: withMenuIcon(ReadOutlined),
+        },
     ];
 
 

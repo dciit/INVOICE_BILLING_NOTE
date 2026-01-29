@@ -6,6 +6,7 @@ export interface ResLogin {
     username: string;
     incharge: string;
     vendername: string;
+    vendercode: string;
     role: string
 }
 
