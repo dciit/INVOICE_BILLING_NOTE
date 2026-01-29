@@ -1,5 +1,5 @@
 
-import { ContactsOutlined, EnvironmentOutlined,  IdcardOutlined,  MailOutlined, PhoneOutlined, PrinterOutlined, UserAddOutlined, UserOutlined } from "@ant-design/icons"
+import { ContactsOutlined, EnvironmentOutlined, IdcardOutlined, MailOutlined, PhoneOutlined, PrinterOutlined, UserAddOutlined, UserOutlined } from "@ant-design/icons"
 import { Input, Select } from "antd"
 import { useEffect, useState } from "react"
 import type { Autheninfo, BankAccount } from "../../interface/response.interface"
@@ -84,19 +84,19 @@ function Accountsetting() {
 
         const payload = {
             username: auth.username,
-                name: vdname,
-                compname: authenInfo?.companY_NAME || '',
-                email: authenInfo?.email || '',
-                taxID: authenInfo?.taxid || '',
-                branchno: authenInfo?.compantbranch || '',
-                fax: authenInfo?.fax || '',
-                telephone: authenInfo?.telephone || '',
-                address: authenInfo?.address || '',
-                accountname: authenInfo?.accounT_NAME || '',
-                accountno: authenInfo?.accounT_NUMER || '',
-                bName: authenInfo?.banK_NAME || '',
-                bBranchname: authenInfo?.bankbrancH_NAME || '',
-                bBranchno: authenInfo?.bankbrancH_NO || ''
+            name: vdname,
+            compname: authenInfo?.companY_NAME || '',
+            email: authenInfo?.email || '',
+            taxID: authenInfo?.taxid || '',
+            branchno: authenInfo?.compantbranch || '',
+            fax: authenInfo?.fax || '',
+            telephone: authenInfo?.telephone || '',
+            address: authenInfo?.address || '',
+            accountname: authenInfo?.accounT_NAME || '',
+            accountno: authenInfo?.accounT_NUMER || '',
+            bName: authenInfo?.banK_NAME || '',
+            bBranchname: authenInfo?.bankbrancH_NAME || '',
+            bBranchno: authenInfo?.bankbrancH_NO || ''
         }
 
         console.log("Payload for API_CREATEACCOUNT:", payload)
@@ -113,6 +113,22 @@ function Accountsetting() {
                 }).then((result) => {
                     if (result.isConfirmed) {
                         Swal.fire('Saved', '', 'success')
+                        setAuthenInfo({
+                            username: "",
+                            usertype: "",
+                            companY_NAME: "",
+                            email: "",
+                            telephone: "",
+                            taxid: "",
+                            fax: "",
+                            compantbranch: "",
+                            address: "",
+                            accounT_NAME: "",
+                            accounT_NUMER: "",
+                            banK_NAME: "",
+                            bankbrancH_NAME: "",
+                            bankbrancH_NO: ""
+                        });
                     } else if (result.isDenied) {
                         Swal.fire('Changes are not saved', '', 'info')
                     }

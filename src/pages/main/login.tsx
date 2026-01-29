@@ -198,7 +198,12 @@ function LoginPage() {
                     icon: "success",
                     title: "Reset สำเร็จ",
                     text: "กรุณาเข้าสู่ระบบด้วยรหัสผ่าน"
-                });
+                }).then(() => {
+                    setRepassUsername("");
+                    setPassword("");
+                    setShowRePassModal(false);
+                    close(false);
+                })
             } else {
                 Swal.fire({
                     icon: "error",
