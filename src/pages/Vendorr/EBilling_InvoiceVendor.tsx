@@ -1,4 +1,4 @@
-//@ts-nocheck
+
 import React, { useEffect, useState } from "react";
 import { DatePicker, Button, Form, Divider, Table, Checkbox, Select } from "antd";
 import { FormOutlined } from "@ant-design/icons";
@@ -40,34 +40,22 @@ export default function EBilling_confirm() {
     const [InvoiceNo, setInvoiceNo] = useState("");
     const [incharge, setIncharge] = useState("");
     const visibleData = dataSource;
+    const [confirmStatus, setConfirmStatus] = useState<"correct" | "not_correct" | null>(null);
+    const [invoiceCheckList, setinvoiceCheckList] = useState<any[]>([]);
+    const [remark, setRemark] = useState("");
+
+    useEffect(() => { }, [auth.username]);
 
 
     useEffect(() => {
-        fetchData();
-    }, [auth.username]);
-
-    const fetchData = async () => {
-        try {
-            setLoading(true);
-            const res = await service.PostLoadInvoiceRequet({
-                venderCode: auth.username,
-                invoiceDateFrom: fromDate.format("YYYYMMDD"),
-                invoiceDateTo: toDate.format("YYYYMMDD")
-            });
-            const mappedData = res.data.map((item: any, index: number) => ({
-                ...item,
-                key: index,
-                whTaxRate: null,
-            }));
-            setDataSource(mappedData);
-
-            console.log(mappedData)
-        } catch (error) {
-            console.error(error);
-        } finally {
-            setLoading(false);
-        }
-    };
+        service.getINVCHECK().then((res) => {
+            try {
+                setinvoiceCheckList(res.data);
+            } catch (error) {
+                console.error(error);
+            }
+        });
+    }, []);
 
     const toggleSelectAll = (checked: boolean) => {
         const keys = visibleData.map(item => item.key);
@@ -88,7 +76,7 @@ export default function EBilling_confirm() {
         try {
             setLoading(true);
             const res = await service.PostLoadInvoiceRequet({
-                venderCode: auth.username,
+                venderCode: auth.vendercode,
                 invoiceNo: InvoiceNo,
                 invoiceDateFrom: fromDate.format("YYYYMMDD"),
                 invoiceDateTo: toDate.format("YYYYMMDD")
@@ -149,6 +137,23 @@ export default function EBilling_confirm() {
             return;
         }
 
+        if (!confirmStatus) {
+            Swal.fire({
+                icon: "warning",
+                title: "Please confirm invoice status.",
+            });
+            return;
+        }
+
+        if (confirmStatus === "INVCHECK02" && !remark.trim()) {
+            Swal.fire({
+                icon: "warning",
+                title: "Please input remark.",
+            });
+            return;
+        }
+
+
         try {
             const nbrRes = await service.getNbr();
             const running = nbrRes.data[0].running;
@@ -189,10 +194,12 @@ export default function EBilling_confirm() {
                     BEFORVATAMOUNT: parseFloat(amtb.toFixed(2)),
                     TOTAL_AMOUNT: parseFloat(totalAmount.toFixed(2)),
                     STATUS: "WAITING_DCI",
-                    ACTYPE: item.actype
+                    ACTYPE: item.actype,
+                    IS_INVOICECORRECT: confirmStatus,
+                    INVOICE_VERIFICATION_REMARK: remark,
                 };
 
-                //console.log("payload", payload)
+                // console.log("payload", payload)
 
                 await service.PostCreateInvoice(payload);
             }
@@ -212,6 +219,93 @@ export default function EBilling_confirm() {
             });
         }
     };
+
+
+    const onNotConfirm = async () => {
+        if (selectedKeys.length === 0) {
+            Swal.fire({ icon: "warning", title: "Please select at least one invoice.", confirmButtonText: "OK" });
+            return;
+        }
+
+        if (incharge === "") {
+            Swal.fire({ icon: "warning", title: "Please input incharge.", confirmButtonText: "OK" });
+            return;
+        }
+
+        if (!confirmStatus) {
+            Swal.fire({ icon: "warning", title: "Please confirm invoice status." });
+            return;
+        }
+
+        if (confirmStatus === "INVCHECK02" && !remark.trim()) {
+            Swal.fire({ icon: "warning", title: "Please input remark." });
+            return;
+        }
+
+        try {
+            const nbrRes = await service.getNbr();
+            const running = nbrRes.data[0].running;
+
+            const selectedItems = dataSource.filter(item => selectedKeys.includes(item.key));
+
+            const payloadList = selectedItems.map((item) => {
+                const amtb = Number(item.amtb ?? 0);
+                const vat = Number(item.vat ?? 0);
+                const whTax = calcWhTax(item);
+                const totalVat = amtb + vat;
+                const totalAmount = totalVat - whTax;
+                const netPaid = totalAmount - whTax;
+                const dueDate = item.duedate ? dayjs(item.duedate, "DD/MM/YYYY") : null;
+                const invoiceDate = item.invoiceDate ? dayjs(item.invoiceDate, "DD/MM/YYYY") : null;
+
+                return {
+                    DOCUMENTNO: running,
+                    DOCUMENTDATE: dayjs().format("YYYY-MM-DD"),
+                    PAYMENT_TERMS: item.paymentTerms?.trim(),
+                    DUEDATE: dueDate && dueDate.isValid() ? dueDate.format("YYYY-MM-DD") : null,
+                    VENDORCODE: item.venderCode?.trim(),
+                    BILLERBY: incharge.trim(),
+                    CREATEBY: incharge.trim(),
+                    INVOICENO: item.invoiceNo?.trim(),
+                    INVOICEDATE: invoiceDate && invoiceDate.isValid() ? invoiceDate.format("YYYY-MM-DD") : null,
+                    TAXID: item.taxID?.trim(),
+                    CURRENCY: item.currency?.trim(),
+                    AMTB: parseFloat(amtb.toFixed(2)),
+                    VAT: parseFloat(vat.toFixed(2)),
+                    TOTALVAT: parseFloat(totalVat.toFixed(2)),
+                    RATE: item.whTaxRate ?? "ไม่หัก",
+                    WHTAX: parseFloat(whTax.toFixed(2)),
+                    NETPAID: parseFloat(netPaid.toFixed(2)),
+                    BEFORVATAMOUNT: parseFloat(amtb.toFixed(2)),
+                    TOTAL_AMOUNT: parseFloat(totalAmount.toFixed(2)),
+                    STATUS: "VENDOR_REJECT",
+                    ACTYPE: item.actype,
+                    IS_INVOICECORRECT: confirmStatus,
+                    INVOICE_VERIFICATION_REMARK: remark,
+                };
+            });
+
+            // 🔥 ยิงครั้งเดียว
+            await service.PostInvoiceincorrect(payloadList);
+
+            Swal.fire({
+                icon: "success",
+                title: "ส่งอีเมลแจ้งปัญหา เรียบร้อยแล้ว! กรุณารอการติดต่อกลับ",
+                confirmButtonText: "OK",
+            });
+
+            setSelectedKeys([]);
+        } catch (err) {
+            console.error("Error", err);
+            Swal.fire({
+                icon: "error",
+                title: "Cannot create invoice!",
+                text: "Please try again later.",
+            });
+        }
+    };
+
+
 
     const columns = [
         { title: "No", dataIndex: "no", width: 60, align: "center" },
@@ -406,11 +500,22 @@ export default function EBilling_confirm() {
         return total.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
     };
 
+
+    const getSelectedGrandTotal = () => {
+        const total = visibleData.reduce((sum, item) => {
+            const amount = Number(item.amtb ?? 0);
+            const vat = Number(item.vat ?? 0);
+            return sum + (amount + vat - calcWhTax(item));
+        }, 0);
+
+        return total.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    };
+
     return (
         <div style={{ minHeight: "100vh", display: "flex", flexDirection: "column" }}>
             <div style={{ display: "flex", alignItems: "center" }}>
                 <FormOutlined style={{ fontSize: 28, marginRight: 10, color: "#1890ff" }} />
-                <p style={{ fontWeight: 600, fontSize: 20, margin: 0 }}>Invoice</p>
+                <p style={{ fontWeight: 600, fontSize: 20, margin: 0 }}>Confirm Invoice</p>
             </div>
 
             <Divider style={{ borderColor: "#d0cdcd", marginTop: 8 }} />
@@ -459,7 +564,6 @@ export default function EBilling_confirm() {
 
 
 
-
             <div style={{ maxHeight: 600, overflowY: "auto" }} className="customTable">
                 <Table
                     columns={columns}
@@ -473,54 +577,130 @@ export default function EBilling_confirm() {
                     summary={() => (
                         <Table.Summary fixed="bottom">
                             <Table.Summary.Row style={{ backgroundColor: "#fafafa", fontWeight: 700 }}>
-                                <Table.Summary.Cell index={0} colSpan={12} align="center">
+                                <Table.Summary.Cell index={0} colSpan={11} align="center">
                                     Grand Total
                                 </Table.Summary.Cell>
-                                <Table.Summary.Cell index={12} align="right">
+                                <Table.Summary.Cell index={11} align="right">
                                     {getGrandTotal()}
                                 </Table.Summary.Cell>
-                                <Table.Summary.Cell index={13}></Table.Summary.Cell>
+                                <Table.Summary.Cell index={12}></Table.Summary.Cell>
                             </Table.Summary.Row>
                         </Table.Summary>
                     )}
                 />
             </div>
 
-
-            <p
-                style={{
-                    marginTop: 10,
-                    display: "flex",
-                    justifyContent: "flex-end",
-                    alignItems: "center"
-                }}
-            >
-                <span style={{ color: "red" }}>*</span>&nbsp;Create By :
-                <input
-                    type="text"
-                    value={incharge}
-                    onChange={(e) => setIncharge(e.target.value)}
-                    style={{
-                        width: 400,
-                        height: 30,
-                        marginLeft: 10,
-                        padding: "0 10px",
-                        borderRadius: 4,
-                        border: "1px solid #d3d336",
-                        backgroundColor: incharge ? "#fff" : "rgb(252 255 199)"
-                    }}
-                />
-            </p>
-
-
-
-
-
-
             {dataSource.length > 0 && (
+                <p
+                    style={{
+                        marginTop: 10,
+                        display: "flex",
+                        justifyContent: "flex-end",
+                        alignItems: "center"
+                    }}
+                >
+                    <span style={{ color: "red" }}>*</span>&nbsp;Create By :
+                    <input
+                        type="text"
+                        value={incharge}
+                        onChange={(e) => setIncharge(e.target.value)}
+                        style={{
+                            width: 400,
+                            height: 30,
+                            marginLeft: 10,
+                            padding: "0 10px",
+                            borderRadius: 4,
+                            border: "1px solid #d3d336",
+                            backgroundColor: incharge ? "#fff" : "rgb(252 255 199)"
+                        }}
+                    />
+                </p>
+            )}
+
+            {/* INVOICE CHECK */}
+            {dataSource.length > 0 && (
+                <div
+                    style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "flex-start",
+                        marginTop: 20,
+                        padding: "10px 20px",
+                        borderTop: "1px solid #e5e5e5",
+                        gap: 20,
+                    }}
+                >
+
+                    <div>
+                        {invoiceCheckList
+                            .filter(item => item.dictkeyno === "INVCHECK01")
+                            .map((item) => (
+                                <Checkbox
+                                    key={item.dictkeyno}
+                                    checked={confirmStatus === item.dictkeyno}
+                                    onChange={() => {
+                                        setConfirmStatus(item.dictkeyno);
+                                        setRemark(""); // ล้าง remark
+                                    }}
+                                    style={{ fontSize: 18, fontWeight: 500, color: "#28cd28" }}
+                                >
+                                    {item.dicttitle}
+                                </Checkbox>
+                            ))}
+                    </div>
+
+
+                    <div style={{ display: "flex", flexDirection: "column", alignItems: "flex-end", gap: 10 }}>
+                        {invoiceCheckList
+                            .filter(item => item.dictkeyno === "INVCHECK02")
+                            .map((item) => (
+                                <Checkbox
+                                    key={item.dictkeyno}
+                                    checked={confirmStatus === item.dictkeyno}
+                                    onChange={() => setConfirmStatus(item.dictkeyno)}
+                                    style={{ fontSize: 18, fontWeight: 500, color: "red" }}
+                                >
+                                    {item.dicttitle}
+                                </Checkbox>
+                            ))}
+
+                        {confirmStatus === "INVCHECK02" && (
+                            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                                <label style={{ fontWeight: 600, whiteSpace: "nowrap" }}>
+                                    Remark <span style={{ color: "red" }}>*</span>
+                                </label>
+                                <textarea
+                                    value={remark}
+                                    onChange={(e) => setRemark(e.target.value)}
+                                    rows={3}
+                                    style={{
+                                        width: "500px",
+                                        padding: 10,
+                                        borderRadius: 6,
+                                        border: "1px solid #d9d9d9",
+                                        backgroundColor: remark ? "rgb(204 246 255)" : "rgb(252 255 199)",
+                                    }}
+                                />
+                            </div>
+                        )}
+                    </div>
+                </div>
+            )}
+
+
+            {dataSource.length > 0 && confirmStatus === "INVCHECK01" && (
                 <div style={{ display: "flex", justifyContent: "center", marginTop: 20 }}>
-                    <Button onClick={onConfirm} style={{ backgroundColor: "#52c41a", color: "#fff", borderRadius: 6, height: 40 }}>
-                        สร้างเอกสาร (ใบวางบิล)
+                    <Button onClick={onConfirm} style={{ backgroundColor: "#52c41a", color: "#fff", borderRadius: 6, height: 40, fontSize: 18 }}>
+                        ยืนยันยอดเงิน
+                    </Button>
+                </div>
+            )}
+
+
+            {confirmStatus === "INVCHECK02" && remark.trim() && (
+                <div style={{ display: "flex", justifyContent: "center", marginTop: 20 }}>
+                    <Button onClick={onNotConfirm} style={{ backgroundColor: "red", color: "#fff", borderRadius: 6, height: 40, fontSize: 18 }}>
+                        ยอดเงินไม่ถูกต้อง
                     </Button>
                 </div>
             )}

@@ -122,7 +122,7 @@ function ToolbarComponent() {
                                     <UserOutlined />{" "}
                                     {auth.role === "rol_accountant"
                                         ? auth.incharge
-                                        : auth.username}
+                                        : auth.vendername}
                                 </>
                             ) : (
                                 "######"

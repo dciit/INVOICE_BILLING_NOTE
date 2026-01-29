@@ -1,5 +1,5 @@
 import axios from "axios";
-import { apiConfirm, apiAttachFile } from "./constants";
+import { apiConfirm, apiAttachFile, apiAccount } from "./constants";
 
 const apiConfirmInstance = axios.create({
     baseURL: apiConfirm,
@@ -12,7 +12,13 @@ const apiAttachInstance = axios.create({
     headers: { "Content-Type": "application/json" },
 });
 
+const apiAccountInstance = axios.create({
+    baseURL: apiAccount,
+    headers: { "Content-Type": "application/json" },
+});
+
 export default {
     apiConfirm: apiConfirmInstance,
-    apiAttach: apiAttachInstance
+    apiAttach: apiAttachInstance,
+    apiAccount: apiAccountInstance
 };

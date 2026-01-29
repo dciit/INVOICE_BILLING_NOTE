@@ -2,7 +2,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Modal, Button } from "antd";
 import '../../css/InvoiceDTModal.css';
-import service from "../../service/confirm.service";
+import service from "../../service/account.service";
 import { useSelector } from "react-redux";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
@@ -12,29 +12,7 @@ interface EBilling_ConfirmACDetailPrintProps {
     open: boolean;
     onClose: () => void;
     refreshData: () => void;
-    invoiceDetail?: {
-        billerby: string;
-        billerdate: string;
-        date: string;
-        documentno: string;
-        duedate: string;
-        netpaid: number;
-        paymenT_TERMS: string;
-        receiveD_BILLERBY: string;
-        receiveD_BILLERDATE: string;
-        taxid: string;
-        totaL_AMOUNT: number;
-        vendorcode: string;
-        vendorname: string;
-        whtax: number;
-        addreS1: string;
-        addreS2: string;
-        faxno: string;
-        zipcode: string;
-        telno: string;
-        invoicedate: string;
-        invoiceno: string;
-    };
+    documentNo?: string;
 }
 
 interface InvoiceDetail {
@@ -51,8 +29,8 @@ interface InvoiceDetail {
     invoiceno: string;
 }
 
-const EBilling_ConfirmACDetailPrint: React.FC<EBilling_ConfirmACDetailPrintProps> = ({ open, onClose, invoiceDetail, refreshData }) => {
-    if (!invoiceDetail) return null;
+const EBilling_ConfirmACDetailPrint: React.FC<EBilling_ConfirmACDetailPrintProps> = ({ open, onClose, documentNo, refreshData }) => {
+    if (!documentNo) return null;
     const auth = useSelector((state: any) => state.reducer.authen);
     const [DataSource, setDataSource] = useState<InvoiceDetail[]>([]);
     const [loading, setLoading] = useState(false);
@@ -67,7 +45,7 @@ const EBilling_ConfirmACDetailPrint: React.FC<EBilling_ConfirmACDetailPrintProps
 
     const fetchData = async () => {
         try {
-            const res = await service.PostReportVendorDetail({ documentNo: invoiceDetail[0]?.documentno });
+            const res = await service.ReportConfirmPrint({ documentNo: documentNo });
             const mappedData = res.data.map((item: any, index: number) => ({ ...item, key: index }));
             setDataSource(mappedData);
         } catch (error) {
@@ -93,7 +71,7 @@ const EBilling_ConfirmACDetailPrint: React.FC<EBilling_ConfirmACDetailPrintProps
         const margin = 10;
 
         pdf.addImage(imgData, 'PNG', margin, margin, pdfWidth, pdfHeight - margin);
-        pdf.save(`ฺBilling_${invoiceDetail.documentno}.pdf`);
+        pdf.save(`ฺBilling_${documentNo}.pdf`);
 
         if (button) button.style.display = "block";
     };
@@ -135,6 +113,7 @@ const EBilling_ConfirmACDetailPrint: React.FC<EBilling_ConfirmACDetailPrintProps
                     </div>
 
 
+
                     <div style={{ fontWeight: "normal", fontSize: 18 }}>โทร.038-650060</div>
                 </div>
 
@@ -156,24 +135,24 @@ const EBilling_ConfirmACDetailPrint: React.FC<EBilling_ConfirmACDetailPrintProps
                             <span style={{ display: "inline-block", width: 180 }}>
                                 <b>บริษัท / Customer :</b>
                             </span>
-                            {invoiceDetail[0]?.vendorcode} : {invoiceDetail[0]?.vendorname}
+                            {DataSource[0]?.vendorcode} : {DataSource[0]?.vendorname}
                         </p>
                         <p style={{ margin: "5px 0 0 0" }}>
                             <span style={{ display: "inline-block", width: 130, fontWeight: "bold" }}>
                                 ที่อยู่ / Address :
                             </span>
-                            {invoiceDetail[0]?.addR1}
+                            {DataSource[0]?.addR1}
                         </p>
                         <p style={{ margin: "5px 0 0 0" }}>
                             <span style={{ display: "inline-block", width: 130 }}></span>
                             <span>
-                                {invoiceDetail[0]?.addR2} &nbsp;  {invoiceDetail[0]?.zipcode}
+                                {DataSource[0]?.addR2} &nbsp;  {DataSource[0]?.zipcode}
                             </span>
                         </p>
                         <p style={{ margin: "5px 0 0 0" }}>
                             <span style={{ display: "inline-block", width: 130 }}></span>
                             <span>
-                                Tel. {invoiceDetail[0]?.telno} &nbsp;&nbsp; Fax. {invoiceDetail[0]?.faxno}
+                                Tel. {DataSource[0]?.telno} &nbsp;&nbsp; Fax. {DataSource[0]?.faxno}
                             </span>
                         </p>
                     </div>
@@ -184,25 +163,25 @@ const EBilling_ConfirmACDetailPrint: React.FC<EBilling_ConfirmACDetailPrintProps
                             <span style={{ display: "inline-block", width: 180 }}>
                                 <b>วันที่ :</b>
                             </span>
-                            {invoiceDetail[0]?.documentdate}
+                            {DataSource[0]?.documentdate}
                         </p>
                         <p style={{ margin: 0, fontSize: 16 }}>
                             <span style={{ display: "inline-block", width: 180 }}>
                                 <b>เลขที่เอกสาร :</b>
                             </span>
-                            {invoiceDetail[0]?.documentno}
+                            {DataSource[0]?.documentno}
                         </p>
                         <p style={{ margin: 0, fontSize: 16 }}>
                             <span style={{ display: "inline-block", width: 200 }}>
                                 <b>เงื่อนไขการชำระเงิน :</b>
                             </span>
-                            {invoiceDetail[0]?.paymenT_TERMS} Days
+                            {DataSource[0]?.paymenT_TERMS} Days
                         </p>
                         <p style={{ margin: 0, fontSize: 16 }}>
                             <span style={{ display: "inline-block", width: 200 }}>
                                 <b>วันที่ครบกำหนดชำระเงิน :</b>
                             </span>
-                            {invoiceDetail[0]?.duedate}
+                            {DataSource[0]?.duedate}
                         </p>
                     </div>
                 </div>
@@ -252,9 +231,7 @@ const EBilling_ConfirmACDetailPrint: React.FC<EBilling_ConfirmACDetailPrintProps
                     </tbody>
                 </table>
 
-                {/* {
-                    JSON.stringify(invoiceDetail)
-                } */}
+
 
                 <div style={{ display: "flex", justifyContent: "space-between", marginTop: 10, padding: "0 20px" }}>
                     <div>
@@ -267,7 +244,7 @@ const EBilling_ConfirmACDetailPrint: React.FC<EBilling_ConfirmACDetailPrintProps
                                 marginLeft: 5,
                                 lineHeight: "24px",
                                 paddingBottom: 4
-                            }}>{invoiceDetail[0]?.receiveD_BILLERBY}</span>
+                            }}>{DataSource[0]?.receiveD_BILLERBY}</span>
                         </div>
                         <div style={{ fontSize: 16 }}>
                             <b>วันที่ :</b>
@@ -278,7 +255,7 @@ const EBilling_ConfirmACDetailPrint: React.FC<EBilling_ConfirmACDetailPrintProps
                                 marginLeft: 5,
                                 lineHeight: "24px",
                                 paddingBottom: 4
-                            }}>{invoiceDetail[0]?.receiveD_BILLERDATE}</span>
+                            }}>{DataSource[0]?.receiveD_BILLERDATE}</span>
                         </div>
                     </div>
 
@@ -292,7 +269,7 @@ const EBilling_ConfirmACDetailPrint: React.FC<EBilling_ConfirmACDetailPrintProps
                                 marginLeft: 5,
                                 lineHeight: "24px",
                                 paddingBottom: 4
-                            }}>{invoiceDetail[0]?.createby}</span>
+                            }}>{DataSource[0]?.billerby}</span>
                         </div>
                         <div style={{ fontSize: 16 }}>
                             <b>วันที่ :</b>
@@ -303,7 +280,7 @@ const EBilling_ConfirmACDetailPrint: React.FC<EBilling_ConfirmACDetailPrintProps
                                 marginLeft: 5,
                                 lineHeight: "24px",
                                 paddingBottom: 4
-                            }}>{invoiceDetail[0]?.createdate}</span>
+                            }}>{DataSource[0]?.billerdate}</span>
                         </div>
                     </div>
                 </div>
@@ -311,73 +288,7 @@ const EBilling_ConfirmACDetailPrint: React.FC<EBilling_ConfirmACDetailPrintProps
 
 
 
-            <div
-                style={{
-                    position: "relative",
-                    marginTop: 20,
-                    height: 48,
-                    display: "flex",
-                    alignItems: "center",
-                    padding: "0 16px",
-                    gap: 12, // ระยะห่างระหว่างปุ่ม
-                }}
-            >
 
-                {auth.role === "rol_accountant" && invoiceDetail.rejecT_BY === "" && (
-                    <Button
-                        danger
-                        size="large"
-                        onClick={RejectBeforeConfirmbilling}
-                        disabled={loading}
-                        style={{
-                            backgroundColor: "red",
-                            borderColor: "red",
-                            color: "white",
-                            height: 38,
-                            fontSize: 14,
-                            padding: "0 36px",
-                            fontWeight: "bold",
-                            pointerEvents: loading ? "none" : "auto",
-                        }}
-                    >
-                        Reject
-                    </Button>
-                )}
-
-
-                {auth.role === "rol_accountant" && invoiceDetail.receiveD_BILLERBY === "" && invoiceDetail.rejecT_BY === "" && (
-                    <Button
-                        type="primary"
-                        size="large"
-                        onClick={confirmbilling}
-                        disabled={loading}
-                        style={{
-                            backgroundColor: "#52c41a",
-                            borderColor: "#52c41a",
-                            height: 38,
-                            fontSize: 14,
-                            padding: "0 36px",
-                            fontWeight: "bold",
-                            pointerEvents: loading ? "none" : "auto",
-                            marginLeft: "auto",
-                        }}
-                    >
-                        {loading ? "กำลังประมวลผล..." : "รับวางบิล"}
-                    </Button>
-                )}
-
-                {/* overlay ตอน loading */}
-                {loading && (
-                    <div
-                        style={{
-                            position: "absolute",
-                            inset: 0,
-                            backgroundColor: "rgba(255,255,255,0.5)",
-                            zIndex: 2,
-                        }}
-                    />
-                )}
-            </div>
 
 
 

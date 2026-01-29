@@ -1,7 +1,8 @@
 
 import React, { useEffect, useState } from "react";
 import { Modal, Table, Tag, Button, Checkbox } from "antd";
-import service from "../../service/confirm.service";
+import serviceMain from "../../service/confirm.service";
+import service from "../../service/account.service";
 import Swal from "sweetalert2";
 import { useSelector } from "react-redux";
 import EBilling_ConfirmACDetailPrint from "./EBilling_ConfirmACDetailPrint";
@@ -40,6 +41,10 @@ const EBilling_ConfirmACModalDetail: React.FC<Props> = ({
   const [selectedKeys, setSelectedKeys] = useState<React.Key[]>([]);
   const [loading, setLoading] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const allKeys = dataSource.map((item: any) => item.key);
+  const isAllSelected = allKeys.length > 0 && selectedKeys.length === allKeys.length;
+  const isIndeterminate = selectedKeys.length > 0 && selectedKeys.length < allKeys.length;
+
 
   useEffect(() => {
     if (open && invoiceDetail?.documentno)
@@ -49,7 +54,7 @@ const EBilling_ConfirmACModalDetail: React.FC<Props> = ({
   const fetchData = async () => {
     try {
       setLoading(true);
-      const res = await service.PostConfirmACDetail({ documentNo: invoiceDetail.documentno, });
+      const res = await service.ReportConfirmDetail({ documentNo: invoiceDetail.documentno, });
 
       const mapped = res.data.map((item: InvoiceDetail) => ({ ...item, key: item.invoiceno, }));
       setDataSource(mapped);
@@ -227,7 +232,7 @@ const EBilling_ConfirmACModalDetail: React.FC<Props> = ({
         }
 
 
-        if (raw.toUpperCase() === "WAITING") {
+        if (raw.toUpperCase() === "WAITING_DCI") {
           return <Tag color="gold">Waiting DCI Confirm</Tag>;
         }
 
@@ -241,9 +246,32 @@ const EBilling_ConfirmACModalDetail: React.FC<Props> = ({
       }),
     },
     {
-      title: "SELECT",
+      title: (
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 6,
+          }}
+        >
+          <Checkbox
+            indeterminate={isIndeterminate}
+            checked={isAllSelected}
+            onChange={(e) => {
+              if (e.target.checked) {
+                setSelectedKeys(allKeys);
+              } else {
+                setSelectedKeys([]);
+              }
+            }}
+          />
+          <span>SELECT</span>
+        </div>
+      ),
       key: "select",
-      width: 120, align: "center",
+      width: 120,
+      align: "center",
       render: (_: any, record: InvoiceDetail) => (
         <Checkbox
           checked={selectedKeys.includes(record.key)}
@@ -251,11 +279,14 @@ const EBilling_ConfirmACModalDetail: React.FC<Props> = ({
             if (e.target.checked) {
               setSelectedKeys([...selectedKeys, record.key]);
             } else {
-              setSelectedKeys(selectedKeys.filter((k) => k !== record.key));
+              setSelectedKeys(
+                selectedKeys.filter((k) => k !== record.key)
+              );
             }
           }}
         />
-      ), onHeaderCell: () => ({
+      ),
+      onHeaderCell: () => ({
         style: {
           backgroundColor: "rgb(167 213 255)",
           color: "black",
@@ -304,7 +335,7 @@ const EBilling_ConfirmACModalDetail: React.FC<Props> = ({
         remark: item.remark || ""
       }));
 
-      await service.PostConfirmBilling({
+      await service.ConfirmBilling({
         invoiceNos: payload.map((p) => p.invoiceNo),
         remarks: payload.map((p) => p.remark),
         issuedBy: auth.incharge.trim(),
@@ -335,7 +366,7 @@ const EBilling_ConfirmACModalDetail: React.FC<Props> = ({
         remark: item.remark || ""
       }));
 
-      await service.PostRejectbilling({
+      await service.Rejectbilling({
         invoiceNos: payload.map((p) => p.invoiceNo),
         remarks: payload.map((p) => p.remark),
         issuedBy: auth.incharge.trim(),
@@ -365,7 +396,7 @@ const EBilling_ConfirmACModalDetail: React.FC<Props> = ({
         remark: item.remark || ""
       }));
 
-      await service.PostCancelConfirmBilling({
+      await service.CancelBilling({
         invoiceNos: payload.map((p) => p.invoiceNo),
         remarks: payload.map((p) => p.remark),
         issuedBy: auth.incharge.trim(),
@@ -390,7 +421,7 @@ const EBilling_ConfirmACModalDetail: React.FC<Props> = ({
   };
 
 
-  const BLOCK_STATUSES = ["REJECT", "CONFIRM", "CANCEL"];
+  const BLOCK_STATUSES = ["REJECT", "CONFIRM", "CANCEL", "PAYMENT", "CANCEL_PAYMENT"];
 
 
   const hasRejectOrConfirm = dataSource.some(item =>
@@ -399,9 +430,7 @@ const EBilling_ConfirmACModalDetail: React.FC<Props> = ({
 
 
 
-  const hasReject = dataSource.some(
-    item => item.status === "CONFIRM"
-  );
+  const hasReject = dataSource.some(item => item.status === "CONFIRM" || item.status === "CANCEL_PAYMENT" || item.status === "PAYMENT");
 
   return (
     <Modal
@@ -417,7 +446,10 @@ const EBilling_ConfirmACModalDetail: React.FC<Props> = ({
         </div>
       }
       open={open}
-      onCancel={onClose}
+      onCancel={() => {
+        setSelectedKeys([]);
+        onClose();
+      }}
       footer={null}
       width={1800}
     >
@@ -432,6 +464,8 @@ const EBilling_ConfirmACModalDetail: React.FC<Props> = ({
         bordered
       />
 
+
+
       <div
         style={{
           marginTop: 16,
@@ -440,7 +474,6 @@ const EBilling_ConfirmACModalDetail: React.FC<Props> = ({
           alignItems: "center",
         }}
       >
-        {/* Left */}
         <Button
           type="primary"
           style={{
@@ -456,11 +489,14 @@ const EBilling_ConfirmACModalDetail: React.FC<Props> = ({
           Print Report
         </Button>
 
-        {/* Right */}
-        <div style={{ display: "flex", gap: 8 }}>
-          {
-            hasReject ? null
-              : (
+
+        {/* Left */}
+        {selectedKeys.length > 0 && (
+          <>
+            {/* Right */}
+            <div style={{ display: "flex", gap: 8 }}>
+              {/* Reject */}
+              {!hasReject && (
                 <Button
                   danger
                   type="primary"
@@ -472,19 +508,16 @@ const EBilling_ConfirmACModalDetail: React.FC<Props> = ({
                     height: 34,
                     fontSize: 16,
                   }}
-                  disabled={selectedKeys.length === 0}
                   onClick={handleRejectbilling}
                 >
                   Reject
                 </Button>
-              )
-          }
+              )}
 
 
 
-          {
-            dataSource[0]?.status === "CONFIRM"
-              ? (
+              {/* Cancel */}
+              {dataSource[0]?.status === "CONFIRM" || dataSource[0]?.status === "CANCEL_PAYMENT" && (
                 <Button
                   danger
                   type="primary"
@@ -496,39 +529,34 @@ const EBilling_ConfirmACModalDetail: React.FC<Props> = ({
                     height: 34,
                     fontSize: 16,
                   }}
-                  disabled={selectedKeys.length === 0}
                   onClick={handleCancelbilling}
                 >
                   Cancel
                 </Button>
-              )
-              : null
-          }
+              )}
 
-
-
-          {
-            !hasRejectOrConfirm && (
-              <Button
-                type="primary"
-                style={{
-                  backgroundColor: "#52c41a",
-                  borderColor: "#52c41a",
-                  color: "white",
-                  width: 100,
-                  height: 34,
-                  fontSize: 16,
-                }}
-                disabled={selectedKeys.length === 0}
-                onClick={handleconfirmbilling}
-              >
-                Confirm
-              </Button>
-            )
-          }
-
-        </div>
+              {/* Confirm */}
+              {!hasRejectOrConfirm && (
+                <Button
+                  type="primary"
+                  style={{
+                    backgroundColor: "#52c41a",
+                    borderColor: "#52c41a",
+                    color: "white",
+                    width: 100,
+                    height: 34,
+                    fontSize: 16,
+                  }}
+                  onClick={handleconfirmbilling}
+                >
+                  Confirm
+                </Button>
+              )}
+            </div>
+          </>
+        )}
       </div>
+
 
       <EBilling_ConfirmACDetailPrint
         open={isDetailModalOpen}

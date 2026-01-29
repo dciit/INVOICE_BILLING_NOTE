@@ -9,8 +9,8 @@ import "../../css/InvoiceConfirm.css";
 import Swal from "sweetalert2";
 import dayjs from "dayjs";
 import isBetween from "dayjs/plugin/isBetween";
-import EBilling_DetailModalAC from "./EBilling_DetailModalAC";
-import EBilling_DetailModalACPrint from "./EBilling_DetailModalACPrint";
+import EBilling_DetailModalAC from "./EBilling_PaymentDetailModal";
+import EBilling_DetailModalACPrint from "../Account/EBilling_PaymentDetailModal";
 
 
 dayjs.extend(isBetween);

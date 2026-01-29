@@ -1,16 +1,18 @@
-//@ts-nocheck
+
 import React, { useEffect, useState } from "react";
-import { DatePicker, Button, Form, Divider, Table, Select, Checkbox, Tag } from "antd";
+import { DatePicker, Button, Form, Divider, Table, Select, Checkbox, Tag, Tooltip } from "antd";
 import { FileProtectOutlined, SearchOutlined, DollarOutlined } from "@ant-design/icons";
 import type { Dayjs } from "dayjs";
-import service from "../../service/confirm.service";
+import serviceMain from "../../service/confirm.service";
+import service from "../../service/account.service";
 import { useSelector } from "react-redux";
 import "../../css/InvoiceConfirm.css";
 import Swal from "sweetalert2";
 import dayjs from "dayjs";
 import isBetween from "dayjs/plugin/isBetween";
-import EBilling_DetailModalAC from "./EBilling_DetailModalAC";
-import EBilling_DetailModalACPrint from "./EBilling_DetailModalACPrint";
+import EBilling_DetailModalACPrint from "../Account/EBilling_PrintPayment";
+import EBilling_PaymentDetailModal from "./EBilling_PaymentDetailModal";
+import EBilling_PaymentCancelModal from "./EBilling_PaymentCancelModal";
 
 
 dayjs.extend(isBetween);
@@ -56,14 +58,20 @@ export default function EBilling_Payment() {
   const [vendor, setVendor] = useState<string>("%");
   const [vendorList, setVendorList] = useState<any[]>([]);
   const [ACType, setACType] = useState<string>("%");
+  const rowKeys = dataSource.map(item => item.vendorcode);
+  const allChecked = selectedRowKeys.length === rowKeys.length && rowKeys.length > 0;
+  const indeterminate = selectedRowKeys.length > 0 && selectedRowKeys.length < rowKeys.length;
+  const [isCancelModalOpen, setIsCancelModalOpen] = useState(false);
+
+
 
 
   useEffect(() => {
-    fetchData();
+
   }, [auth.username]);
 
   useEffect(() => {
-    service.getVendor().then((res) => {
+    serviceMain.getVendor().then((res) => {
       try {
         setVendorList(res.data);
       } catch (error) {
@@ -72,22 +80,7 @@ export default function EBilling_Payment() {
     });
   }, []);
 
-  const fetchData = async () => {
-    try {
-      setLoading(true);
-      const res = await service.PostReportACHeader({
-        status: "%", role: auth.role, invoiceDateFrom: fromDate.format("YYYY-MM-DD"),
-        invoiceDateTo: toDate.format("YYYY-MM-DD"),
-      });
-      const mappedData = res.data.map((item: any, index: number) => ({ ...item, key: index }));
-      setDataSource(mappedData);
 
-    } catch (error) {
-      console.error(error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
   const onSearch = async () => {
     if (!fromDate || !toDate) {
@@ -97,18 +90,22 @@ export default function EBilling_Payment() {
 
     try {
       setLoading(true);
-      const res = await service.PostReportACHeader({
-        venderCode: auth.username,
+      const res = await service.HeaderPayment({
+        venderCode: vendor,
         invoiceDateFrom: fromDate.format("YYYY-MM-DD"),
         invoiceDateTo: toDate.format("YYYY-MM-DD"),
         status: status,
-        role: auth.role
+        role: auth.incharge.trim(),
+        actype: ACType
       });
 
       const filteredData = res.data
 
 
       setDataSource(filteredData);
+      setSelectedRowKeys([]);
+
+      console.log("filteredData", filteredData)
     } catch (error) {
       console.error(error);
     } finally {
@@ -116,19 +113,44 @@ export default function EBilling_Payment() {
     }
   };
 
+  // เลือก row ที่ถูก select
+  const payload = dataSource.filter((item) => selectedRowKeys.includes(item.vendorcode)).map((item) => ({
+    vendorCode: item.vendorcode,
+    status: item.status
+  }));
+
+
+
+  const handlePayment = async () => {
+    try {
+      setLoading(true);
+
+
+      await service.PaymentBilling({
+        vendorCode: payload.map((p) => p.vendorCode),
+        status: payload.map((p) => p.status),
+        issuedBy: auth.incharge.trim(),
+        invoiceDateFrom: fromDate.format("YYYY-MM-DD"),
+        invoiceDateTo: toDate.format("YYYY-MM-DD"),
+      });
+
+      Swal.fire("สำเร็จ!", "PAYMENT เรียบร้อยแล้ว", "success");
+
+      onSearch();
+      setSelectedRowKeys([]);
+    } catch (error: any) {
+      console.error(error);
+      Swal.fire("ล้มเหลว!", error.message || "ไม่สามารถบันทึกข้อมูลได้", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
+
   const columns = [
     {
       title: "No", width: 60, align: "center", render: (_: any, __: any, index: number) => index + 1,
-      onHeaderCell: () => ({
-        style: {
-          backgroundColor: "rgb(167 213 255)",
-          color: "black",
-          fontWeight: "bold",
-        },
-      }),
-    },
-    {
-      title: "DOCUMENT NO", dataIndex: "documentno", width: 150, align: "center",
       onHeaderCell: () => ({
         style: {
           backgroundColor: "rgb(167 213 255)",
@@ -246,11 +268,11 @@ export default function EBilling_Payment() {
         const status = raw.toLowerCase();
 
         if (status === "payment") {
-          return <Tag color="green">Payment</Tag>;
+          return <Tag color="green">PAYMENT</Tag>;
         }
 
         if (status === "confirm") {
-          return <Tag color="blue">Confirm</Tag>;
+          return <Tag color="blue">CONFIRM</Tag>;
         }
 
         if (raw.toUpperCase() === "WAITING_VENDOR") {
@@ -259,6 +281,10 @@ export default function EBilling_Payment() {
 
         if (raw.toUpperCase() === "WAITING_DCI") {
           return <Tag color="gold">Waiting DCI Confirm</Tag>;
+        }
+
+        if (raw.toUpperCase() === "CANCEL_PAYMENT") {
+          return <Tag color="red">CANCEL PAYMENT</Tag>;
         }
 
         return <Tag>{value}</Tag>; // อื่นๆ แสดงตามเดิม
@@ -293,19 +319,32 @@ export default function EBilling_Payment() {
       }),
     },
     {
-      title: "SELECT",
-      width: 80,
+      title: (
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+          <Checkbox
+            checked={allChecked}
+            indeterminate={indeterminate}
+            onChange={(e) => {
+              if (e.target.checked) {
+                setSelectedRowKeys(rowKeys); // เลือกทั้งหมด
+              } else {
+                setSelectedRowKeys([]); // ยกเลิกทั้งหมด
+              }
+            }}
+          />
+          <span style={{ fontWeight: "bold" }}>SELECT</span>
+        </div>
+      ),
+      width: 120,
       align: "center",
       render: (_: any, record: InvoiceDetail) => (
         <Checkbox
-          checked={selectedRowKeys.includes(record.invoiceNo)}
+          checked={selectedRowKeys.includes(record.vendorcode)} // ✅ ใช้ vendorcode เป็น key
           onChange={(e) => {
             if (e.target.checked) {
-              setSelectedRowKeys([...selectedRowKeys, record.invoiceNo]);
+              setSelectedRowKeys([...selectedRowKeys, record.vendorcode]);
             } else {
-              setSelectedRowKeys(
-                selectedRowKeys.filter(key => key !== record.invoiceNo)
-              );
+              setSelectedRowKeys(selectedRowKeys.filter((key) => key !== record.vendorcode));
             }
           }}
         />
@@ -313,11 +352,41 @@ export default function EBilling_Payment() {
       onHeaderCell: () => ({
         style: {
           backgroundColor: "rgb(167 213 255)",
-          color: "black",
+          textAlign: "center",
           fontWeight: "bold",
         },
       }),
     },
+    {
+      title: "CANCEL",
+      width: 90,
+      align: "center",
+      render: (_: any, record: InvoiceDetail) =>
+        record.status === "PAYMENT" ? (
+          <Button
+            danger
+            size="small"
+            style={{
+              backgroundColor: 'red',
+              border: 'red',
+              color: 'white'
+            }}
+            onClick={() => {
+              setDetailRecordDetail(record);
+              setIsCancelModalOpen(true);
+            }}
+          >
+            Cancel
+          </Button>
+        ) : null,
+      onHeaderCell: () => ({
+        style: {
+          backgroundColor: "rgb(167 213 255)",
+          color: "black",
+          fontWeight: "bold",
+        },
+      }),
+    }
   ];
 
   const getGrandTotalAmount = () => {
@@ -339,6 +408,11 @@ export default function EBilling_Payment() {
   const exportPDF = () => {
     setDetailRecordPrint(dataSource);
     setIsDetailModalOpenPrint(true);
+  };
+
+  const handleCloseCancelModal = () => {
+    setIsCancelModalOpen(false);
+    setSelectedRowKeys([]); // ✅ เคลียร์ checkbox ทุกครั้งที่ปิด
   };
 
 
@@ -449,10 +523,9 @@ export default function EBilling_Payment() {
 
           <Form.Item>
             <Select value={status} onChange={setStatus} style={{ width: 200, height: 32 }}>
-              <Option value="%">All</Option>
-              <Option value="CANCEL">Cancel</Option>
-              <Option value="CONFIRM">Confirm</Option>
-              <Option value="PAYMENT">Payment</Option>
+              <Option value="CANCEL_PAYMENT">CANCEL</Option>
+              <Option value="CONFIRM">CONFIRM</Option>
+              <Option value="PAYMENT">PAYMENT</Option>
             </Select>
           </Form.Item>
 
@@ -473,8 +546,8 @@ export default function EBilling_Payment() {
             <Button
               onClick={exportPDF}
               style={{
-                backgroundColor: "#52c41a",
-                borderColor: "#52c41a",
+                backgroundColor: "gray",
+                borderColor: "gray",
                 height: 32,
                 color: "white"
               }}
@@ -483,8 +556,39 @@ export default function EBilling_Payment() {
             </Button>
           </Form.Item>
 
+
+          <Form.Item>
+            <Button
+              onClick={handlePayment}
+              disabled={
+                !(dataSource[0]?.status === "CONFIRM" && selectedRowKeys.length > 0)
+              }
+              style={{
+                backgroundColor:
+                  dataSource[0]?.status === "CONFIRM" && selectedRowKeys.length > 0
+                    ? "#52c41a"
+                    : "#ccc",
+                borderColor:
+                  dataSource[0]?.status === "CONFIRM" && selectedRowKeys.length > 0
+                    ? "#52c41a"
+                    : "#ccc",
+                height: 32,
+                color: "white",
+                cursor:
+                  dataSource[0]?.status === "CONFIRM" && selectedRowKeys.length > 0
+                    ? "pointer"
+                    : "not-allowed",
+              }}
+            >
+              Payment
+            </Button>
+          </Form.Item>
+
+
         </Form>
       </div>
+
+
 
 
       <div style={{ maxHeight: 600 }} className="customTable">
@@ -499,17 +603,19 @@ export default function EBilling_Payment() {
           loading={loading}
           rowClassName={(record: MData) => {
             const status = record.status?.trim().toLowerCase();
-
+          
             if (status === "payment") return "row-payment";
             if (status === "confirm") return "row-confirm";
             if (status === "waiting") return "row-waiting";
             if (status === "reject") return "row-reject";
+            if (status === "cancel_payment") return "row-reject";
+
             return "";
           }}
           summary={() => (
             <Table.Summary fixed="bottom">
               <Table.Summary.Row style={{ backgroundColor: "#fafafa", fontWeight: 700 }}>
-                <Table.Summary.Cell colSpan={7} align="center">Grand Total</Table.Summary.Cell>
+                <Table.Summary.Cell colSpan={6} align="center">Grand Total</Table.Summary.Cell>
                 <Table.Summary.Cell align="right">{getGrandTotalAmount()}</Table.Summary.Cell>
                 <Table.Summary.Cell align="right">{getGrandTotalWHTax()}</Table.Summary.Cell>
                 <Table.Summary.Cell align="right">{getGrandTotalNetPaid()}</Table.Summary.Cell>
@@ -523,12 +629,26 @@ export default function EBilling_Payment() {
         />
       </div>
 
-      <EBilling_DetailModalAC
+      <EBilling_PaymentDetailModal
         open={isDetailModalOpenDetail}
         onClose={() => setIsDetailModalOpenDetail(false)}
         invoiceDetail={detailRecordDetail}
         refreshData={onSearch}
+        invoiceDateFrom={fromDate.format("YYYY-MM-DD")}
+        invoiceDateTo={toDate.format("YYYY-MM-DD")}
       />
+
+      <EBilling_PaymentCancelModal
+        open={isCancelModalOpen}
+        onClose={handleCloseCancelModal}
+        invoiceDetail={detailRecordDetail}
+        refreshData={onSearch}
+        invoiceDateFrom={fromDate.format("YYYY-MM-DD")}
+        invoiceDateTo={toDate.format("YYYY-MM-DD")}
+        selectedRowKeys={selectedRowKeys}
+        payload={payload}
+      />
+
 
 
       <EBilling_DetailModalACPrint

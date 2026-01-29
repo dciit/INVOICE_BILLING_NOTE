@@ -16,6 +16,7 @@ export interface AuthenInfo {
     username: string;
     incharge: string;
     vendername: string;
+    vendercode: string;
     role: string;
     pwd: string;
     token: string;

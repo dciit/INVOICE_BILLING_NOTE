@@ -1,17 +1,17 @@
-//@ts-nocheck
+
 import React, { useEffect, useState } from "react";
 import { DatePicker, Button, Form, Divider, Table, Select, Tag } from "antd";
-import { FileProtectOutlined, PrinterOutlined, SearchOutlined, LinkOutlined } from "@ant-design/icons";
+import { FileProtectOutlined, PrinterOutlined, SearchOutlined, LinkOutlined, FilePdfOutlined, FileSearchOutlined } from "@ant-design/icons";
 import type { Dayjs } from "dayjs";
-import service from "../../service/confirm.service";
+import serviceMain from "../../service/confirm.service";
+import service from "../../service/account.service";
 import { useSelector } from "react-redux";
 import "../../css/InvoiceConfirm.css";
 import Swal from "sweetalert2";
 import dayjs from "dayjs";
 import isBetween from "dayjs/plugin/isBetween";
-import EBilling_DetailModalVendor from "../Vendorr/EBilling_DetailModalVendor";
-import EBilling_DetailModalVendorPrint from "../Vendorr/EBilling_DetailModalVendorPrint";
 import EBilling_ConfirmACModalDetail from "./EBilling_ConfirmACModalDetail";
+import EBilling_ConfirmACDetailPrint from "./EBilling_ConfirmACDetailPrint";
 
 dayjs.extend(isBetween);
 
@@ -57,12 +57,12 @@ export default function EBilling_ConfirmAC() {
 
 
     useEffect(() => {
-        //  fetchData();
+
     }, [auth.username]);
 
 
     useEffect(() => {
-        service.getVendor().then((res) => {
+        serviceMain.getVendor().then((res) => {
             try {
                 setVendorList(res.data);
             } catch (error) {
@@ -72,22 +72,6 @@ export default function EBilling_ConfirmAC() {
     }, []);
 
 
-    const fetchData = async () => {
-        try {
-            setLoading(true);
-            const res = await service.PostConfirmACHeader({
-                venderCode: auth.username, status: "WAITING", role: auth.role, invoiceDateFrom: fromDate.format("YYYY-MM-DD"),
-                invoiceDateTo: toDate.format("YYYY-MM-DD")
-            });
-            const mappedData = res.data.map((item: any, index: number) => ({ ...item, key: index }));
-            setDataSource(mappedData);
-
-        } catch (error) {
-            console.error(error);
-        } finally {
-            setLoading(false);
-        }
-    };
 
     const onSearch = async () => {
         if (!fromDate || !toDate) {
@@ -97,7 +81,7 @@ export default function EBilling_ConfirmAC() {
 
         try {
             setLoading(true);
-            const res = await service.PostConfirmACHeader({
+            const res = await service.ReportConfirmHeader({
                 venderCode: vendor,
                 invoiceDateFrom: fromDate.format("YYYY-MM-DD"),
                 invoiceDateTo: toDate.format("YYYY-MM-DD"),
@@ -127,6 +111,16 @@ export default function EBilling_ConfirmAC() {
             }),
         },
         {
+            title: "BILLING NO", dataIndex: "documentno", width: 150, align: "center", fixed: "left",
+            onHeaderCell: () => ({
+                style: {
+                    backgroundColor: "rgb(167 213 255)",
+                    color: "black",
+                    fontWeight: "bold",
+                },
+            }),
+        },
+        {
             title: "DUE DATE",
             dataIndex: "duedate",
             width: 120,
@@ -142,16 +136,6 @@ export default function EBilling_ConfirmAC() {
         },
         {
             title: "AC TYPE", dataIndex: "actype", width: 100, align: "center",
-            onHeaderCell: () => ({
-                style: {
-                    backgroundColor: "rgb(167 213 255)",
-                    color: "black",
-                    fontWeight: "bold",
-                },
-            }),
-        },
-        {
-            title: "BILLING NO", dataIndex: "documentno", width: 150, align: "center",
             onHeaderCell: () => ({
                 style: {
                     backgroundColor: "rgb(167 213 255)",
@@ -259,22 +243,30 @@ export default function EBilling_ConfirmAC() {
                 const status = raw.toLowerCase();
 
                 if (status === "payment") {
-                    return <Tag color="green">Payment</Tag>;
+                    return <Tag color="green">PAYMENT</Tag>;
                 }
 
                 if (status === "confirm") {
-                    return <Tag color="blue">Confirm</Tag>;
+                    return <Tag color="blue">CONFIRM</Tag>;
                 }
 
                 if (raw.toUpperCase() === "WAITING_VENDOR") {
                     return <Tag color="orange">Waiting Vendor Confirm</Tag>;
                 }
 
-                if (raw.toUpperCase() === "WAITING") {
+                if (raw.toUpperCase() === "WAITING_DCI") {
                     return <Tag color="gold">Waiting DCI Confirm</Tag>;
                 }
 
-                return <Tag>{value}</Tag>; // อื่นๆ แสดงตามเดิม
+                if (raw.toUpperCase() === "CANCEL_PAYMENT") {
+                    return <Tag color="red">CANCEL PAYMENT</Tag>;
+                }
+
+                if (raw.toUpperCase() === "CANCEL") {
+                    return <Tag color="red">CANCEL CONFIRM</Tag>;
+                }
+
+                return <Tag color="red">{value}</Tag>; // อื่นๆ แสดงตามเดิม
             },
             onHeaderCell: () => ({
                 style: {
@@ -289,8 +281,8 @@ export default function EBilling_ConfirmAC() {
             width: 80,
             align: "center",
             render: (_: any, record: InvoiceDetail) => (
-                <SearchOutlined
-                    style={{ fontSize: 18, color: "#1890ff", cursor: "pointer" }}
+                <FileSearchOutlined
+                    style={{ fontSize: 18, color: "#15c915", cursor: "pointer" }}
                     onClick={() => {
                         setDetailRecord(record);
                         setIsDetailModalOpen(true);
@@ -310,8 +302,8 @@ export default function EBilling_ConfirmAC() {
             width: 100,
             align: "center",
             render: (_: any, record: InvoiceDetail) => (
-                <LinkOutlined
-                    style={{ fontSize: 18, color: "#1890ff", cursor: "pointer" }}
+                <FilePdfOutlined
+                    style={{ fontSize: 18, color: "red", cursor: "pointer" }}
                     onClick={() =>
                         window.open(
                             `$"{file:///D:/Project/2025/INVOICEBILLINENOTE_API/Uploads}/${record.filE_NAME}"`,
@@ -334,9 +326,9 @@ export default function EBilling_ConfirmAC() {
             align: "center",
             render: (_: any, record: InvoiceDetail) => (
                 <PrinterOutlined
-                    style={{ fontSize: 18, color: "#1890ff", cursor: "pointer" }}
+                    style={{ fontSize: 18, color: "black", cursor: "pointer" }}
                     onClick={() => {
-                        setDetailRecord(dataSource);
+                        setDetailRecord(record.documentno); // ✅ เฉพาะแถวที่กด
                         setIsDetailModalOpenPrint(true);
                     }}
                 />
@@ -349,6 +341,7 @@ export default function EBilling_ConfirmAC() {
                 },
             }),
         }
+
     ];
 
     const getGrandTotalAmount = () => dataSource.reduce((sum, item) => sum + Number(item.totaL_AMOUNT ?? 0), 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -502,6 +495,9 @@ export default function EBilling_ConfirmAC() {
                         if (status === "confirm") return "row-confirm";
                         if (status === "waiting") return "row-waiting";
                         if (status === "reject") return "row-reject";
+                        if (status === "cancel") return "row-reject";
+                        if (status === "cancel_payment") return "row-reject";
+
 
                         if (raw?.toUpperCase() === "WAITING_VENDOR") return "row-wait-vendor";
                         if (raw?.toUpperCase() === "WAITING_DCI") return "row-wait-dci";
@@ -533,6 +529,7 @@ export default function EBilling_ConfirmAC() {
             /> */}
 
 
+
             <EBilling_ConfirmACModalDetail
                 open={isDetailModalOpen}
                 onClose={() => setIsDetailModalOpen(false)}
@@ -540,10 +537,10 @@ export default function EBilling_ConfirmAC() {
                 refreshData={onSearch}
             />
 
-            <EBilling_DetailModalVendorPrint
+            <EBilling_ConfirmACDetailPrint
                 open={isDetailModalOpenPrint}
                 onClose={() => setIsDetailModalOpenPrint(false)}
-                invoiceDetail={detailRecord}
+                documentNo={detailRecord}
                 refreshData={onSearch}
             />
         </div>

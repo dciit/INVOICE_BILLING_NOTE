@@ -108,7 +108,7 @@ const EBilling_DetailModalVendor: React.FC<EBilling_DetailModalVendorProps> = ({
             const invoiceNoList = DataSource.map(item => `'${item.documentno}'`).join(",");
             const invoiceNoForIn = `(${invoiceNoList})`;
 
-            await service.PostConfirmBilling({
+            await service.ConfirmBilling({
                 documentNo: DataSource[0]?.documentno,
                 receiveBy: auth.incharge.trim()
             });

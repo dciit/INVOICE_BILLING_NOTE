@@ -1,36 +1,9 @@
-//@ts-nocheck
-import React, { useEffect, useState, useRef } from "react";
+import React, { useRef } from "react";
 import { Modal, Button } from "antd";
 import "../../css/InvoiceDTModal.css";
-import service from "../../service/confirm.service";
 import { useSelector } from "react-redux";
 import html2canvas from "html2canvas";
 import jsPDF from "jspdf";
-
-interface EBilling_DetailModalACPrintProps {
-    open: boolean;
-    onClose: () => void;
-    invoiceDetail?: {
-        address: string;
-        billerby: string;
-        billerdate: string;
-        date: string;
-        documentno: string;
-        duedate: string;
-        netpaid: number;
-        paymenT_TERMS: string;
-        receiveD_BILLERBY: string;
-        receiveD_BILLERDATE: string;
-        taxid: string;
-        totaL_AMOUNT: number;
-        vendorcode: string;
-        vendorname: string;
-        whtax: number;
-        status: string;
-        invoicedate: string;
-        invoiceno: string;
-    };
-}
 
 interface InvoiceDetail {
     key: React.Key;
@@ -44,22 +17,37 @@ interface InvoiceDetail {
     vat?: number;
     whtax?: number;
     invoiceno?: string;
+    vendorcode?: string;
+    vendorname?: string;
+    totaL_AMOUNT?: number;
 }
 
-const EBilling_DetailModalACPrint: React.FC<EBilling_DetailModalACPrintProps> = ({ open, onClose, invoiceDetail }) => {
+interface EBilling_PrintPaymentProps {
+    open: boolean;
+    onClose: () => void;
+    // สามารถรับทั้ง object หรือ array
+    invoiceDetail?: InvoiceDetail | InvoiceDetail[];
+}
+
+const EBilling_PrintPayment: React.FC<EBilling_PrintPaymentProps> = ({
+    open,
+    onClose,
+    invoiceDetail
+}) => {
     const auth = useSelector((state: any) => state.reducer.authen);
     const modalRef = useRef<HTMLDivElement>(null);
     const n = (v?: number) => (v ?? 0).toLocaleString();
     const thStyle = { border: "1px solid #333", padding: "5px" };
     const tdStyle = { border: "1px solid #333", padding: "5px" };
 
-    useEffect(() => {
-        if (open) {
-            setTimeout(() => {
-                exportPDF();
-            }, 500);
-        }
-    }, [open]);
+    // แปลงให้ invoiceArray เป็น array เสมอ
+    const invoiceArray: InvoiceDetail[] = Array.isArray(invoiceDetail)
+        ? invoiceDetail
+        : invoiceDetail
+            ? [invoiceDetail]
+            : [];
+
+    if (invoiceArray.length === 0) return null;
 
     const exportPDF = async () => {
         if (!modalRef.current) return;
@@ -77,22 +65,19 @@ const EBilling_DetailModalACPrint: React.FC<EBilling_DetailModalACPrintProps> = 
 
         pdf.addImage(imgData, "PNG", 0, 0, pageWidth, pageHeight);
 
-
         pdf.autoPrint();
         window.open(pdf.output("bloburl"), "_blank");
     };
-
-
-
-    if (!invoiceDetail) return null;
-
 
     return (
         <Modal
             title={null}
             open={open}
             onCancel={onClose}
-            footer={null}
+            footer={[
+                <Button key="close" onClick={onClose}>Close</Button>,
+                <Button key="print" type="primary" onClick={exportPDF}>Print / Export PDF</Button>
+            ]}
             width={1200}
         >
             <div ref={modalRef}>
@@ -104,19 +89,15 @@ const EBilling_DetailModalACPrint: React.FC<EBilling_DetailModalACPrintProps> = 
                     <div style={{ fontSize: 18 }}>
                         เลขประจำตัวผู้เสียภาษี 0105544013305 สำนักงานใหญ่
                     </div>
-
                     <div style={{ position: "relative", fontSize: 18 }}>
                         7/202 หมู่ 6 ตำบลมาบยางพร อำเภอปลวกแดง จังหวัดระยอง 21140
                     </div>
-
                     <div style={{ fontSize: 18 }}>โทร.038-650060</div>
                 </div>
 
                 <div style={{ fontSize: 22, textAlign: "center" }}>
                     รายงานสรุปยอดโอนเงินรวม
                 </div>
-
-
 
                 <table
                     style={{
@@ -128,59 +109,45 @@ const EBilling_DetailModalACPrint: React.FC<EBilling_DetailModalACPrintProps> = 
                 >
                     <thead>
                         <tr style={{ backgroundColor: "#f2f2f2", textAlign: "center" }}>
-                            <th style={thStyle} className="w-[60px]">ลำดับที่</th>
-                            <th style={thStyle} className="w-[100px]">รหัส</th>
-                            <th style={thStyle} className="w-[400px]">ชื่อบริษัท</th>
-                            <th style={thStyle} className="w-[150px]">จำนวนเงินรวม ภาษีมูลค่าเพิ่ม</th>
-                            <th style={thStyle} className="w-[150px]">ภาษีหัก ณ ที่จ่าย</th>
-                            <th style={thStyle} className="w-[150px]">จำนวนเงินหลังหัก ภาษีหัก ณ ที่จ่าย</th>
+                            <th style={thStyle}>ลำดับที่</th>
+                            <th style={thStyle}>รหัส</th>
+                            <th style={thStyle}>ชื่อบริษัท</th>
+                            <th style={thStyle}>จำนวนเงินรวม ภาษีมูลค่าเพิ่ม</th>
+                            <th style={thStyle}>ภาษีหัก ณ ที่จ่าย</th>
+                            <th style={thStyle}>จำนวนเงินหลังหัก ภาษีหัก ณ ที่จ่าย</th>
                         </tr>
                     </thead>
-
                     <tbody>
-                        {invoiceDetail.map((item, index) => (
-                            <tr key={item.key} style={{ textAlign: "center" }}>
+                        {invoiceArray.map((item, index) => (
+                            <tr key={item.key || index} style={{ textAlign: "center" }}>
                                 <td style={tdStyle}>{index + 1}</td>
-                                <td style={tdStyle} className="text-left">{item.vendorcode}</td>
-                                <td style={tdStyle} className="text-left">{item.vendorname}</td>
-                                <td style={tdStyle} className="text-right">
-                                    {n(item.totalvat)}
-                                </td>
-                                <td style={tdStyle} className="text-right">
-                                    {n(item.whtax)}
-                                </td>
-                                <td style={tdStyle} className="text-right">
-                                    {n(item.totaL_AMOUNT)}
-                                </td>
+                                <td style={tdStyle}>{item.vendorcode}</td>
+                                <td style={tdStyle} className="text-left" >{item.vendorname}</td>
+                                <td style={tdStyle} className="text-right">{n(item.totalvat)}</td>
+                                <td style={tdStyle} className="text-right">{n(item.whtax)}</td>
+                                <td style={tdStyle} className="text-right">{n(item.totaL_AMOUNT)}</td>
                             </tr>
                         ))}
 
-                        {invoiceDetail.length > 0 && (
+                        {invoiceArray.length > 0 && (
                             <tr style={{ fontWeight: "bold", background: "#f9f9f9" }}>
                                 <td style={tdStyle} colSpan={3} className="text-center">ยอดรวมทั้งสิ้น</td>
-
-
                                 <td style={tdStyle} className="text-right">
-                                    {n(invoiceDetail.reduce((s, i) => s + (i.totalvat ?? 0), 0))}
+                                    {n(invoiceArray.reduce((s, i) => s + (i.totalvat ?? 0), 0))}
                                 </td>
-
-
                                 <td style={tdStyle} className="text-right">
-                                    {n(invoiceDetail.reduce((s, i) => s + (i.whtax ?? 0), 0))}
+                                    {n(invoiceArray.reduce((s, i) => s + (i.whtax ?? 0), 0))}
                                 </td>
-
-
                                 <td style={tdStyle} className="text-right">
-                                    {n(invoiceDetail.reduce((s, i) => s + (i.totaL_AMOUNT ?? 0), 0))}
+                                    {n(invoiceArray.reduce((s, i) => s + (i.totaL_AMOUNT ?? 0), 0))}
                                 </td>
                             </tr>
                         )}
                     </tbody>
-
                 </table>
             </div>
         </Modal>
     );
 };
 
-export default EBilling_DetailModalACPrint;
+export default EBilling_PrintPayment;
